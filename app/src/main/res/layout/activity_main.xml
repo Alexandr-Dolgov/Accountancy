@@ -27,14 +27,14 @@
 
             <TextView
                 android:textAppearance="?android:attr/textAppearanceLarge"
-                android:text="Приход"
+                android:text="@string/receipt"
                 android:id="@+id/textViewReceipt" />
 
             <EditText
                 android:inputType="numberDecimal"
                 android:ems="10"
                 android:id="@+id/editTextReceipt"
-                android:text="0" />
+                android:text="" />
         </TableRow>
 
         <TableRow
@@ -45,7 +45,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textAppearance="?android:attr/textAppearanceLarge"
-                android:text="Приготовила"
+                android:text="@string/prepared"
                 android:id="@+id/textViewPrepared" />
 
             <EditText
@@ -54,7 +54,7 @@
                 android:inputType="numberDecimal"
                 android:ems="10"
                 android:id="@+id/editTextPrepared"
-                android:text="0" />
+                android:text="" />
         </TableRow>
 
         <TableRow
@@ -65,7 +65,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textAppearance="?android:attr/textAppearanceLarge"
-                android:text="Остаток"
+                android:text="@string/remainder"
                 android:id="@+id/textViewRemainder" />
 
             <EditText
@@ -74,7 +74,7 @@
                 android:inputType="numberDecimal"
                 android:ems="10"
                 android:id="@+id/editTextRemainder"
-                android:text="0" />
+                android:text="" />
         </TableRow>
 
         <TableRow
@@ -85,7 +85,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textAppearance="?android:attr/textAppearanceLarge"
-                android:text="Продала"
+                android:text="@string/sold"
                 android:id="@+id/textViewSold" />
 
             <EditText
@@ -94,7 +94,7 @@
                 android:inputType="numberDecimal"
                 android:ems="10"
                 android:id="@+id/editTextSold"
-                android:text="0" />
+                android:text="" />
         </TableRow>
 
         <TableRow
@@ -105,7 +105,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textAppearance="?android:attr/textAppearanceLarge"
-                android:text="Хоз. нужды"
+                android:text="@string/write_off"
                 android:id="@+id/textViewWriteOff" />
 
             <EditText
@@ -114,7 +114,7 @@
                 android:inputType="numberDecimal"
                 android:ems="10"
                 android:id="@+id/editTextWriteOff"
-                android:text="0" />
+                android:text="" />
         </TableRow>
     </TableLayout>
 
@@ -185,7 +185,7 @@
         <Button
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="&lt;--"
+            android:text="@string/arrow_left"
             android:id="@+id/buttonPrev"
             android:textSize="48dp"
             android:layout_alignParentLeft="true"
@@ -196,7 +196,7 @@
         <Button
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="-->"
+            android:text="@string/arrow_right"
             android:id="@+id/buttonNext"
             android:textSize="48dp"
             android:layout_alignParentRight="true"
@@ -207,7 +207,7 @@
         <Button
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="отчет"
+            android:text="@string/report"
             android:id="@+id/buttonReport"
             android:textSize="24dp"
             android:layout_toLeftOf="@+id/buttonNext"
