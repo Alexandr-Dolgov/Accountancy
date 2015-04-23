@@ -150,6 +150,15 @@
                 android:id="@+id/textViewProductValue" />
         </LinearLayout>
 
+        <Button
+            android:layout_width="100sp"
+            android:layout_height="wrap_content"
+            android:text="@string/equal"
+            android:id="@+id/buttonCalc"
+            android:textSize="48sp"
+            android:layout_centerVertical="true"
+            android:layout_centerHorizontal="true" />
+
         <LinearLayout
             android:orientation="vertical"
             android:layout_width="wrap_content"
@@ -187,7 +196,7 @@
             android:layout_height="wrap_content"
             android:text="@string/arrow_left"
             android:id="@+id/buttonPrev"
-            android:textSize="48dp"
+            android:textSize="48sp"
             android:layout_alignParentLeft="true"
             android:layout_alignParentStart="false"
             android:layout_centerVertical="true"
@@ -198,7 +207,7 @@
             android:layout_height="wrap_content"
             android:text="@string/arrow_right"
             android:id="@+id/buttonNext"
-            android:textSize="48dp"
+            android:textSize="48sp"
             android:layout_alignParentRight="true"
             android:layout_alignParentEnd="false"
             android:layout_centerVertical="true"
@@ -209,7 +218,7 @@
             android:layout_height="wrap_content"
             android:text="@string/report"
             android:id="@+id/buttonReport"
-            android:textSize="24dp"
+            android:textSize="24sp"
             android:layout_toLeftOf="@+id/buttonNext"
             android:layout_alignTop="@+id/buttonNext"
             android:layout_toRightOf="@+id/buttonPrev"
