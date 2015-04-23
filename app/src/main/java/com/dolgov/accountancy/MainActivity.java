@@ -21,6 +21,7 @@ public class MainActivity extends Activity {
     EditText writeOff;    //хоз. нужды
 
     TextView product;
+    Button calc;
     TextView money;
 
     Button prev;
@@ -35,6 +36,15 @@ public class MainActivity extends Activity {
         findMyViews();
 
         date.setText("0");
+
+        calc.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //TODO добавить вычисление по реальным данным
+                product.setText("9999");
+                money.setText("9999");
+            }
+        });
 
         prev.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -112,8 +122,9 @@ public class MainActivity extends Activity {
         sold = (EditText) findViewById(R.id.editTextSold);
         writeOff = (EditText) findViewById(R.id.editTextWriteOff);
 
-        product = (TextView) findViewById(R.id.textViewProduct);
-        money = (TextView) findViewById(R.id.textViewMoney);
+        product = (TextView) findViewById(R.id.textViewProductValue);
+        calc = (Button) findViewById(R.id.buttonCalc);
+        money = (TextView) findViewById(R.id.textViewMoneyValue);
 
         prev = (Button) findViewById(R.id.buttonPrev);
         next = (Button) findViewById(R.id.buttonNext);
