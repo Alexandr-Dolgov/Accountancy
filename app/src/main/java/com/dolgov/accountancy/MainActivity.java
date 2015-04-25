@@ -2,6 +2,7 @@ package com.dolgov.accountancy;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -12,21 +13,23 @@ import android.widget.TextView;
 
 public class MainActivity extends Activity {
 
-    TextView date;
+    TextView tvDate;
 
-    EditText receipt;     //приход
-    EditText prepared;    //приготовила
-    EditText remainder;   //остаток
-    EditText sold;        //продала
-    EditText writeOff;    //хоз. нужды
+    EditText etReceipt;     //приход
+    EditText etPrepared;    //приготовила
+    EditText etRemainder;   //остаток
+    EditText etSold;        //продала
+    EditText etWriteOff;    //хоз. нужды
 
-    TextView product;
-    Button calc;
-    TextView money;
+    TextView tvProduct;
+    Button bCalc;
+    TextView tvMoney;
 
-    Button prev;
-    Button next;
-    Button report;
+    Button bPrev;
+    Button bNext;
+    Button bReport;
+
+    private static final String TAG = "Accountancy";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,49 +38,67 @@ public class MainActivity extends Activity {
 
         findMyViews();
 
-        date.setText("0");
+        tvDate.setText("0");
 
-        calc.setOnClickListener(new View.OnClickListener() {
+        bCalc.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //TODO добавить вычисление по реальным данным
-                product.setText("9999");
-                money.setText("9999");
+
+                //создадим первоначальный объект, по которому будем считать последующие
+                Record prevRecord = Record.getFirst();
+
+                Record currentRecord;
+                //currentRecord = new Record(prevRecord, 990.5, 592.56, 145, 610, 0);
+                currentRecord = new Record(
+                        prevRecord,
+                        Double.parseDouble(etReceipt.getText().toString()),
+                        Double.parseDouble(etPrepared.getText().toString()),
+                        Double.parseDouble(etRemainder.getText().toString()),
+                        Double.parseDouble(etSold.getText().toString()),
+                        Double.parseDouble(etWriteOff.getText().toString())
+                );
+                Log.d(TAG, currentRecord.toString());
+
+                double product = currentRecord.getProduct();
+                tvProduct.setText(String.format("%.2f", product));
+
+                double money = currentRecord.getMoney();
+                tvMoney.setText(String.format("%.2f", money));
             }
         });
 
-        prev.setOnClickListener(new View.OnClickListener() {
+        bPrev.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String text = date.getText().toString();
+                String text = tvDate.getText().toString();
                 int val = Integer.parseInt(text);
                 val--;
                 text = String.valueOf(val);
-                date.setText(text);
+                tvDate.setText(text);
             }
         });
 
-        next.setOnClickListener(new View.OnClickListener() {
+        bNext.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String text = date.getText().toString();
+                String text = tvDate.getText().toString();
                 int val = Integer.parseInt(text);
                 val++;
                 text = String.valueOf(val);
-                date.setText(text);
+                tvDate.setText(text);
 
                 clearEditTexts();
             }
         });
 
-        report.setOnClickListener(new View.OnClickListener() {
+        bReport.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String text = date.getText().toString();
+                String text = tvDate.getText().toString();
                 int val = Integer.parseInt(text);
                 val = 0;
                 text = String.valueOf(val);
-                date.setText(text);
+                tvDate.setText(text);
             }
         });
     }
@@ -106,28 +127,28 @@ public class MainActivity extends Activity {
     }
 
     protected void clearEditTexts(){
-        receipt.setText("");
-        prepared.setText("");
-        remainder.setText("");
-        sold.setText("");
-        writeOff.setText("");
+        etReceipt.setText("");
+        etPrepared.setText("");
+        etRemainder.setText("");
+        etSold.setText("");
+        etWriteOff.setText("");
     }
 
     protected void findMyViews(){
-        date = (TextView) findViewById(R.id.textViewDate);
+        tvDate = (TextView) findViewById(R.id.textViewDate);
 
-        receipt = (EditText) findViewById(R.id.editTextReceipt);
-        prepared = (EditText) findViewById(R.id.editTextPrepared);
-        remainder = (EditText) findViewById(R.id.editTextRemainder);
-        sold = (EditText) findViewById(R.id.editTextSold);
-        writeOff = (EditText) findViewById(R.id.editTextWriteOff);
+        etReceipt = (EditText) findViewById(R.id.editTextReceipt);
+        etPrepared = (EditText) findViewById(R.id.editTextPrepared);
+        etRemainder = (EditText) findViewById(R.id.editTextRemainder);
+        etSold = (EditText) findViewById(R.id.editTextSold);
+        etWriteOff = (EditText) findViewById(R.id.editTextWriteOff);
 
-        product = (TextView) findViewById(R.id.textViewProductValue);
-        calc = (Button) findViewById(R.id.buttonCalc);
-        money = (TextView) findViewById(R.id.textViewMoneyValue);
+        tvProduct = (TextView) findViewById(R.id.textViewProductValue);
+        bCalc = (Button) findViewById(R.id.buttonCalc);
+        tvMoney = (TextView) findViewById(R.id.textViewMoneyValue);
 
-        prev = (Button) findViewById(R.id.buttonPrev);
-        next = (Button) findViewById(R.id.buttonNext);
-        report = (Button) findViewById(R.id.buttonReport);
+        bPrev = (Button) findViewById(R.id.buttonPrev);
+        bNext = (Button) findViewById(R.id.buttonNext);
+        bReport = (Button) findViewById(R.id.buttonReport);
     }
 }
