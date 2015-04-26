@@ -2,6 +2,7 @@ package com.dolgov.accountancy;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.os.Environment;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -31,22 +32,28 @@ public class MainActivity extends Activity {
 
     private static final String TAG = "Accountancy";
 
+    private Record prevRecord;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
         findMyViews();
-
         tvDate.setText("0");
+
+        //получаем пред. запись. Пока в тестовом режиме это первая запись,
+        //потом тут должа браться последняя запись из БД
+        prevRecord = Record.getFirst();
+
+        //TODO
+        //если база данных не существует, то
+        //  создадим ее
+        //  поместим туда Record.getFirst()
 
         bCalc.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
-                //создадим первоначальный объект, по которому будем считать последующие
-                Record prevRecord = Record.getFirst();
-
                 Record currentRecord;
                 //currentRecord = new Record(prevRecord, 990.5, 592.56, 145, 610, 0);
                 currentRecord = new Record(
@@ -64,6 +71,8 @@ public class MainActivity extends Activity {
 
                 double money = currentRecord.getMoney();
                 tvMoney.setText(String.format("%.2f", money));
+
+                prevRecord = currentRecord;
             }
         });
 
@@ -86,6 +95,9 @@ public class MainActivity extends Activity {
                 val++;
                 text = String.valueOf(val);
                 tvDate.setText(text);
+
+
+                //prevRecord.insertIntoDB();
 
                 clearEditTexts();
             }
@@ -132,6 +144,9 @@ public class MainActivity extends Activity {
         etRemainder.setText("");
         etSold.setText("");
         etWriteOff.setText("");
+
+        tvProduct.setText("?");
+        tvMoney.setText("?");
     }
 
     protected void findMyViews(){

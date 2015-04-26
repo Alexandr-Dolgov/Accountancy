@@ -1,5 +1,9 @@
 package com.dolgov.accountancy;
 
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -61,14 +65,14 @@ public class Record {
     public String toString(){
         StringBuilder sb = new StringBuilder();
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy.MM.dd");
-        sb.append("дата: " + sdf.format(date) + "\n");
-        sb.append("приход: " + receipt + "\n");
-        sb.append("приготовила: " + prepared + "\n");
-        sb.append("остаток: " + remainder + "\n");
-        sb.append("продала: " + sold + "\n");
-        sb.append("хоз. нужды: " + writeOff + "\n");
-        sb.append("продукты: " + prepared + "\n");
-        sb.append("деньги: " + money + "\n");
+        sb.append("дата: ").append(sdf.format(date)).append("\n");
+        sb.append("приход: ").append(receipt).append("\n");
+        sb.append("приготовила: ").append(prepared).append("\n");
+        sb.append("остаток: ").append(remainder).append("\n");
+        sb.append("продала: ").append(sold).append("\n");
+        sb.append("хоз. нужды: ").append(writeOff).append("\n");
+        sb.append("продукты: ").append(prepared).append("\n");
+        sb.append("деньги: ").append(money).append("\n");
         return sb.toString();
     }
 
