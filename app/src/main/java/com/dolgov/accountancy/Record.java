@@ -1,9 +1,5 @@
 package com.dolgov.accountancy;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
-import java.sql.Statement;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -30,8 +26,9 @@ public class Record {
             double sold,
             double writeOff){
 
+
         GregorianCalendar calendar = new GregorianCalendar();
-        calendar.setGregorianChange(prevRecord.date);
+        calendar.setTime(prevRecord.date);
         calendar.add(Calendar.DATE, 1);
 
         this.date = calendar.getTime();
@@ -50,7 +47,7 @@ public class Record {
 
     public static Record getFirst(){
         Record firstRecord = new Record();
-        firstRecord.date = (new GregorianCalendar(2006, 5, 17)).getTime();
+        firstRecord.date = (new GregorianCalendar(2006, Calendar.MAY, 17)).getTime();
         firstRecord.receipt = 0;
         firstRecord.prepared = 682.8;
         firstRecord.remainder = 159;
