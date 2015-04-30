@@ -25,13 +25,7 @@ public class Record {
             double remainder,
             double sold,
             double writeOff){
-
-
-        GregorianCalendar calendar = new GregorianCalendar();
-        calendar.setTime(prevRecord.date);
-        calendar.add(Calendar.DATE, 1);
-
-        this.date = calendar.getTime();
+        this.date = prevRecord.getNextDate();
         this.receipt = receipt;
         this.prepared = prepared;
         this.remainder = remainder;
@@ -41,6 +35,25 @@ public class Record {
         //calc: product, money
         this.product = prevRecord.product + receipt - (prepared / 1.1);
         this.money = prevRecord.money - receipt + sold - writeOff;
+    }
+
+    public Record(
+            Date date,
+            double receipt,
+            double prepared,
+            double remainder,
+            double sold,
+            double writeOff,
+            double product,
+            double money){
+        this.date = date;
+        this.receipt = receipt;
+        this.prepared = prepared;
+        this.remainder = remainder;
+        this.sold = sold;
+        this.writeOff =writeOff;
+        this.product = product;
+        this.money = money;
     }
 
     private Record(){}
@@ -62,15 +75,46 @@ public class Record {
     public String toString(){
         StringBuilder sb = new StringBuilder();
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy.MM.dd");
-        sb.append("дата: ").append(sdf.format(date)).append("\n");
-        sb.append("приход: ").append(receipt).append("\n");
-        sb.append("приготовила: ").append(prepared).append("\n");
-        sb.append("остаток: ").append(remainder).append("\n");
-        sb.append("продала: ").append(sold).append("\n");
-        sb.append("хоз. нужды: ").append(writeOff).append("\n");
-        sb.append("продукты: ").append(prepared).append("\n");
-        sb.append("деньги: ").append(money).append("\n");
+        sb.append("дата: ").append(sdf.format(date)).append(" ");
+        sb.append("приход: ").append(receipt).append(" ");
+        sb.append("приготовила: ").append(prepared).append(" ");
+        sb.append("остаток: ").append(remainder).append(" ");
+        sb.append("продала: ").append(sold).append(" ");
+        sb.append("хоз. нужды: ").append(writeOff).append(" ");
+        sb.append("продукты: ").append(product).append(" ");
+        sb.append("деньги: ").append(money).append(" ");
         return sb.toString();
+    }
+
+    public Date getNextDate(){
+        GregorianCalendar calendar = new GregorianCalendar();
+        calendar.setTime(this.date);
+        calendar.add(Calendar.DATE, 1);
+        return  calendar.getTime();
+    }
+
+    public Date getDate() {
+        return date;
+    }
+
+    public double getReceipt() {
+        return receipt;
+    }
+
+    public double getPrepared() {
+        return prepared;
+    }
+
+    public double getRemainder() {
+        return remainder;
+    }
+
+    public double getSold() {
+        return sold;
+    }
+
+    public double getWriteOff() {
+        return writeOff;
     }
 
     public double getProduct(){
@@ -79,5 +123,12 @@ public class Record {
 
     public double getMoney(){
         return money;
+    }
+
+    public Date getPrevDate() {
+        GregorianCalendar calendar = new GregorianCalendar();
+        calendar.setTime(this.date);
+        calendar.add(Calendar.DATE, -1);
+        return calendar.getTime();
     }
 }

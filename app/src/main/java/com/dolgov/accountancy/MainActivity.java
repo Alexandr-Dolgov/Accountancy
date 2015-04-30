@@ -10,6 +10,8 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import java.text.SimpleDateFormat;
+
 
 public class MainActivity extends Activity {
 
@@ -29,9 +31,11 @@ public class MainActivity extends Activity {
     Button bNext;
     Button bReport;
 
-    private static final String TAG = "Accountancy";
+    private final String TAG = this.getClass().getName();
 
-    private Record prevRecord;
+    private Record currentRecord;
+
+    private DatabaseAdapter dbAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,77 +45,93 @@ public class MainActivity extends Activity {
         findMyViews();
         tvDate.setText("0");
 
-        //получаем пред. запись. Пока в тестовом режиме это первая запись,
-        //потом тут должа браться последняя запись из БД
-        prevRecord = Record.getFirst();
+        dbAdapter = new DatabaseAdapter(this);
+        dbAdapter.selectAll();
 
-        //TODO
-        //если база данных не существует, то
-        //  создадим ее
-        //  поместим туда Record.getFirst()
+        //получаем последнюю запись из БД
+        currentRecord = dbAdapter.getLastRecord();
+        showCurrentRecord();
 
         bCalc.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Record currentRecord;
-                //currentRecord = new Record(prevRecord, 990.5, 592.56, 145, 610, 0);
-                currentRecord = new Record(
-                        prevRecord,
+                Record newRecord;
+                //newRecord = new Record(prevRecord, 990.5, 592.56, 145, 610, 0);
+                newRecord = new Record(
+                        currentRecord,
                         Double.parseDouble(etReceipt.getText().toString()),
                         Double.parseDouble(etPrepared.getText().toString()),
                         Double.parseDouble(etRemainder.getText().toString()),
                         Double.parseDouble(etSold.getText().toString()),
                         Double.parseDouble(etWriteOff.getText().toString())
                 );
-                Log.d(TAG, currentRecord.toString());
+                Log.d(TAG, newRecord.toString());
 
-                double product = currentRecord.getProduct();
+                double product = newRecord.getProduct();
                 tvProduct.setText(String.format("%.2f", product));
 
-                double money = currentRecord.getMoney();
+                double money = newRecord.getMoney();
                 tvMoney.setText(String.format("%.2f", money));
 
-                prevRecord = currentRecord;
+                dbAdapter.insert(newRecord);
+                dbAdapter.selectAll();
+
+                currentRecord = newRecord;
             }
         });
 
         bPrev.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String text = tvDate.getText().toString();
-                int val = Integer.parseInt(text);
-                val--;
-                text = String.valueOf(val);
-                tvDate.setText(text);
+                //если в базе данных существует запись с пред. датой,
+                // тогда загружаем ее
+                // инача ничего не делаем
+                Record record = dbAdapter.getPrevRecord(currentRecord);
+                if (record != null){
+                    currentRecord = record;
+                    showCurrentRecord();
+                } else {
+                    Log.d(TAG, "prev Record not Exist");
+                }
             }
         });
 
         bNext.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String text = tvDate.getText().toString();
-                int val = Integer.parseInt(text);
-                val++;
-                text = String.valueOf(val);
-                tvDate.setText(text);
-
-
-                //prevRecord.insertIntoDB();
-
-                clearEditTexts();
+                //если в базе данных существует запись со след. датой,
+                // тогда загружаем ее
+                // инача показываем чистый экран
+                if (dbAdapter.nextRecordExist(currentRecord)) {
+                    Log.d(TAG, "next Record Exist");
+                } else {
+                    Log.d(TAG, "next Record not Exist");
+                    clearEditTexts();
+                }
             }
         });
 
         bReport.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String text = tvDate.getText().toString();
-                int val = Integer.parseInt(text);
-                val = 0;
-                text = String.valueOf(val);
-                tvDate.setText(text);
+                tvDate.setText("0");
             }
         });
+    }
+
+    private void showCurrentRecord() {
+        Record record = currentRecord;
+
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy.MM.dd");
+        tvDate.setText(sdf.format(record.getDate()));
+
+        etReceipt.setText(String.format("%.2f", record.getReceipt()));
+        etPrepared.setText(String.format("%.2f", record.getPrepared()));
+        etRemainder.setText(String.format("%.2f", record.getRemainder()));
+        etSold.setText(String.format("%.2f", record.getSold()));
+        etWriteOff.setText(String.format("%.2f", record.getWriteOff()));
+        tvProduct.setText(String.format("%.2f", record.getProduct()));
+        tvMoney.setText(String.format("%.2f", record.getMoney()));
     }
 
 
