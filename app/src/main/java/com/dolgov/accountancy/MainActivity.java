@@ -107,6 +107,8 @@ public class MainActivity extends Activity {
                 } else {
                     Log.d(TAG, "next Record not Exist");
                     clearEditTexts();
+                    SimpleDateFormat sdf = new SimpleDateFormat("yyyy.MM.dd");
+                    tvDate.setText(sdf.format(currentRecord.getNextDate()));
                 }
             }
         });
