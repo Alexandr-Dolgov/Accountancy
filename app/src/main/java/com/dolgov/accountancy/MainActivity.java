@@ -3,12 +3,14 @@ package com.dolgov.accountancy;
 import android.app.Activity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.text.SimpleDateFormat;
 
@@ -57,14 +59,23 @@ public class MainActivity extends Activity {
             public void onClick(View v) {
                 Record newRecord;
                 //newRecord = new Record(prevRecord, 990.5, 592.56, 145, 610, 0);
-                newRecord = new Record(
-                        currentRecord,
-                        Double.parseDouble(etReceipt.getText().toString()),
-                        Double.parseDouble(etPrepared.getText().toString()),
-                        Double.parseDouble(etRemainder.getText().toString()),
-                        Double.parseDouble(etSold.getText().toString()),
-                        Double.parseDouble(etWriteOff.getText().toString())
-                );
+                try {
+                    newRecord = new Record(
+                            currentRecord,
+                            Double.parseDouble(etReceipt.getText().toString()),
+                            Double.parseDouble(etPrepared.getText().toString()),
+                            Double.parseDouble(etRemainder.getText().toString()),
+                            Double.parseDouble(etSold.getText().toString()),
+                            Double.parseDouble(etWriteOff.getText().toString())
+                    );
+                } catch (NumberFormatException e){
+                    Toast toast = Toast.makeText(getApplicationContext(),
+                            "Заполните все поля!",
+                            Toast.LENGTH_SHORT);
+                    toast.setGravity(Gravity.CENTER, 0, 0);
+                    toast.show();
+                    return;
+                }
                 Log.d(TAG, newRecord.toString());
 
                 double product = newRecord.getProduct();
@@ -86,6 +97,7 @@ public class MainActivity extends Activity {
                 //если в базе данных существует запись с пред. датой,
                 // тогда загружаем ее
                 // инача ничего не делаем
+                /*
                 Record record = dbAdapter.getPrevRecord(currentRecord);
                 if (record != null){
                     currentRecord = record;
@@ -93,6 +105,13 @@ public class MainActivity extends Activity {
                 } else {
                     Log.d(TAG, "prev Record not Exist");
                 }
+                */
+
+                Toast toast = Toast.makeText(getApplicationContext(),
+                        "Еще не реализовано!",
+                        Toast.LENGTH_SHORT);
+                toast.setGravity(Gravity.CENTER, 0, 0);
+                toast.show();
             }
         });
 
@@ -116,7 +135,11 @@ public class MainActivity extends Activity {
         bReport.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                tvDate.setText("0");
+                Toast toast = Toast.makeText(getApplicationContext(),
+                        "Еще не реализовано!",
+                        Toast.LENGTH_SHORT);
+                toast.setGravity(Gravity.CENTER, 0, 0);
+                toast.show();
             }
         });
     }
