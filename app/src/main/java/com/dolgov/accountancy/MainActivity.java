@@ -100,6 +100,7 @@ public class MainActivity extends Activity {
 
                 Record record = dbAdapter.getPrevRecord(currentRecord);
                 if (record != null){
+                    Log.d(TAG, "prev Record Exist");
                     currentRecord = record;
                     showCurrentRecord();
                 } else {
@@ -119,8 +120,11 @@ public class MainActivity extends Activity {
                 //если в базе данных существует запись со след. датой,
                 // тогда загружаем ее
                 // инача показываем чистый экран
-                if (dbAdapter.nextRecordExist(currentRecord)) {
+                Record record = dbAdapter.getNextRecord(currentRecord);
+                if (record != null) {
                     Log.d(TAG, "next Record Exist");
+                    currentRecord = record;
+                    showCurrentRecord();
                 } else {
                     Log.d(TAG, "next Record not Exist");
                     clearEditTexts();

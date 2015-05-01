@@ -52,23 +52,42 @@ public class DatabaseAdapter {
         database.insert(TABLE_NAME, null, cv);
     }
 
-    public boolean nextRecordExist(Record currentRecord){
-        Log.d(TAG, "---nextRecordExist(Record currentRecord)---");
+    public Record getLastRecord(){
+        Log.d(TAG, "---getLastRecord()---");
         String sql = "SELECT * " +
                 " FROM " + TABLE_NAME +
-                " WHERE date = " + currentRecord.getNextDate().getTime();
+                " WHERE date=(SELECT MAX(date) FROM " + TABLE_NAME + " )";
         Cursor cursor = database.rawQuery(sql, null);
-        if (cursor.getCount() > 0) {
-            print(cursor);
-            return true;
-        }
-        return false;
+        print(cursor);
+
+        Record record = getRecord(cursor);
+        Log.d(TAG, "record = " + record);
+
+        cursor.close();
+
+        return record;
     }
 
     public Record getPrevRecord(Record currentRecord){
         Log.d(TAG, "---getPrevRecord(Record currentRecord)---");
         Date prevDate = currentRecord.getPrevDate();
         long unixTime = prevDate.getTime();
+        String sql = "SELECT * " +
+                " FROM " + TABLE_NAME +
+                " WHERE date = " + unixTime;
+        Cursor cursor = database.rawQuery(sql, null);
+        cursor.moveToFirst();
+        if (cursor.getCount() > 0) {
+            return getRecord(cursor);
+        }
+
+        return null;
+    }
+
+    public Record getNextRecord(Record currentRecord) {
+        Log.d(TAG, "---getNextRecord(Record currentRecord)---");
+        Date nextDate = currentRecord.getNextDate();
+        long unixTime = nextDate.getTime();
         String sql = "SELECT * " +
                 " FROM " + TABLE_NAME +
                 " WHERE date = " + unixTime;
@@ -90,22 +109,6 @@ public class DatabaseAdapter {
         cursor.close();
     }
 
-    public Record getLastRecord(){
-        Log.d(TAG, "---getLastRecord()---");
-        String sql = "SELECT * " +
-                " FROM " + TABLE_NAME +
-                " WHERE date=(SELECT MAX(date) FROM " + TABLE_NAME + " )";
-        Cursor cursor = database.rawQuery(sql, null);
-        print(cursor);
-
-        Record record = getRecord(cursor);
-        Log.d(TAG, "record = " + record);
-
-        cursor.close();
-
-        return record;
-    }
-
     private Record getRecord(Cursor cursor){
         Date date = new Date();
         date.setTime(cursor.getLong(cursor.getColumnIndex(DATE_COLUMN)));
@@ -117,9 +120,7 @@ public class DatabaseAdapter {
         double product = cursor.getDouble(cursor.getColumnIndex(PRODUCT_COLUMN));
         double money = cursor.getDouble(cursor.getColumnIndex(MONEY_COLUMN));
 
-        Record record = new Record(date, receipt, prepared, remainder, sold, writeOff, product, money);
-
-        return record;
+        return new Record(date, receipt, prepared, remainder, sold, writeOff, product, money);
     }
 
     private void print(Cursor cursor){
