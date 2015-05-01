@@ -96,22 +96,20 @@ public class MainActivity extends Activity {
             public void onClick(View v) {
                 //если в базе данных существует запись с пред. датой,
                 // тогда загружаем ее
-                // инача ничего не делаем
-                /*
+                // иначе говорим что пред. записей нет
+
                 Record record = dbAdapter.getPrevRecord(currentRecord);
                 if (record != null){
                     currentRecord = record;
                     showCurrentRecord();
                 } else {
-                    Log.d(TAG, "prev Record not Exist");
+                    Toast toast = Toast.makeText(getApplicationContext(),
+                            "Это самая первая запись!\n" +
+                            "Предыдущих записей нет.",
+                            Toast.LENGTH_SHORT);
+                    toast.setGravity(Gravity.CENTER, 0, 0);
+                    toast.show();
                 }
-                */
-
-                Toast toast = Toast.makeText(getApplicationContext(),
-                        "Еще не реализовано!",
-                        Toast.LENGTH_SHORT);
-                toast.setGravity(Gravity.CENTER, 0, 0);
-                toast.show();
             }
         });
 

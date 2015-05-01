@@ -67,13 +67,17 @@ public class DatabaseAdapter {
 
     public Record getPrevRecord(Record currentRecord){
         Log.d(TAG, "---getPrevRecord(Record currentRecord)---");
+        Date prevDate = currentRecord.getPrevDate();
+        long unixTime = prevDate.getTime();
         String sql = "SELECT * " +
                 " FROM " + TABLE_NAME +
-                " WHERE date = " + currentRecord.getPrevDate().getTime();
+                " WHERE date = " + unixTime;
         Cursor cursor = database.rawQuery(sql, null);
+        cursor.moveToFirst();
         if (cursor.getCount() > 0) {
             return getRecord(cursor);
         }
+
         return null;
     }
 
