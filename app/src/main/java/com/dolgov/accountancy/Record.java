@@ -5,9 +5,6 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 
-/**
- * Created by Alexandr on 23.04.2015.
- */
 public class Record {
     private Date date;
     private double receipt;     //приход

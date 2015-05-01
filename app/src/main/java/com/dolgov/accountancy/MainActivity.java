@@ -14,7 +14,6 @@ import android.widget.Toast;
 
 import java.text.SimpleDateFormat;
 
-
 public class MainActivity extends Activity {
 
     TextView tvDate;

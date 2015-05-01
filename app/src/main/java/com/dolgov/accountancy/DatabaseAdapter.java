@@ -9,9 +9,6 @@ import android.util.Log;
 
 import java.util.Date;
 
-/**
- * Created by Alexandr on 30.04.2015.
- */
 public class DatabaseAdapter {
 
     private final String TAG = this.getClass().getName();
