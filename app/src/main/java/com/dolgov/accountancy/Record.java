@@ -128,4 +128,22 @@ public class Record {
         calendar.add(Calendar.DATE, -1);
         return calendar.getTime();
     }
+
+    @Override
+    public boolean equals(Object object){
+        if (object == this) {
+            return  true;
+        }
+        if (object instanceof Record) {
+            return (date.equals(((Record) object).date)) &&
+                    (((Record) object).receipt == receipt) &&
+                    (((Record) object).prepared == prepared) &&
+                    (((Record) object).remainder == remainder) &&
+                    (((Record) object).sold == sold) &&
+                    (((Record) object).writeOff == writeOff) &&
+                    (((Record) object).product == product) &&
+                    (((Record) object).money == money);
+        }
+        return false;
+    }
 }
