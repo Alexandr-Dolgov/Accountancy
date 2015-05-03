@@ -160,6 +160,13 @@ public class MainActivity extends Activity {
         tvMoney.setText(String.format("%.2f", record.getMoney()));
     }
 
+    //этот метод вызывается перед уничтожением Activity
+    //в этом методе мы освобождаем ресерсы
+    @Override
+    protected void onDestroy(){
+        super.onDestroy();
+    }
+
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
