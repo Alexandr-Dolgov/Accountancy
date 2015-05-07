@@ -43,6 +43,9 @@ public class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        //VKSdk.initialize(sdkListener, VK_APP_ID);
+        //VKUIHelper.onCreate(this);
+
         findMyViews();
         tvDate.setText("0");
 
