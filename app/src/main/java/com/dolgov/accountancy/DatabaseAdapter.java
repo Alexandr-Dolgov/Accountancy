@@ -7,14 +7,16 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
+import java.util.Calendar;
 import java.util.Date;
+import java.util.GregorianCalendar;
 
 public class DatabaseAdapter {
 
     private final String TAG = this.getClass().getName();
 
     private static final String DATABASE_NAME = "accountancy.db";
-    private static final int DATABASE_VERSION = 5;
+    private static final int DATABASE_VERSION = 6;
 
     private static final String TABLE_NAME = "mytable";
 
@@ -169,10 +171,10 @@ public class DatabaseAdapter {
                     PRODUCT_COLUMN +" REAL NOT NULL, " +
                     MONEY_COLUMN + " REAL NOT NULL);";
             db.execSQL(sql);
-            long date = Record.getFirst().getDate().getTime();
+            long date = (new GregorianCalendar(2015, Calendar.APRIL, 22)).getTime().getTime();
             db.execSQL("INSERT INTO " + TABLE_NAME +
                     " (date, receipt, prepared, remainder, sold, writeOff, product, money) " +
-                    " VALUES ( " + date + ", 0, 682.8, 159, 625, 0, 2971.23, 1346);");
+                    " VALUES ( " + date + ", 0, 1689.2, 90, 2300, 0, 21002.92, 19075.52);");
         }
 
         @Override

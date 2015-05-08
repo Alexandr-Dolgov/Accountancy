@@ -1,6 +1,7 @@
 package com.dolgov.accountancy;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Gravity;
@@ -11,6 +12,13 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.vk.sdk.VKAccessToken;
+import com.vk.sdk.VKScope;
+import com.vk.sdk.VKSdk;
+import com.vk.sdk.VKSdkListener;
+import com.vk.sdk.VKUIHelper;
+import com.vk.sdk.api.VKError;
 
 import java.text.SimpleDateFormat;
 
@@ -38,13 +46,52 @@ public class MainActivity extends Activity {
 
     private DatabaseAdapter dbAdapter;
 
+    private static final String VK_APP_ID = "4902641";
+
+    private final VKSdkListener sdkListener = new VKSdkListener() {
+        @Override
+        public void onAcceptUserToken(VKAccessToken token) {
+            Log.d("VkDemoApp", "onAcceptUserToken " + token);
+        }
+
+        @Override
+        public void onReceiveNewToken(VKAccessToken newToken) {
+            Log.d("VkDemoApp", "onReceiveNewToken " + newToken);
+        }
+
+        @Override
+        public void onRenewAccessToken(VKAccessToken token) {
+            Log.d("VkDemoApp", "onRenewAccessToken " + token);
+        }
+
+        @Override
+        public void onCaptchaError(VKError captchaError) {
+            Log.d("VkDemoApp", "onCaptchaError " + captchaError);
+        }
+
+        @Override
+        public void onTokenExpired(VKAccessToken expiredToken) {
+            Log.d("VkDemoApp", "onTokenExpired " + expiredToken);
+        }
+
+        @Override
+        public void onAccessDenied(VKError authorizationError) {
+            Log.d("VkDemoApp", "onAccessDenied " + authorizationError);
+        }
+    };
+
+    private static String[] sMyScope = new String[] {
+            VKScope.MESSAGES,
+            VKScope.NOHTTPS
+    };
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        //VKSdk.initialize(sdkListener, VK_APP_ID);
-        //VKUIHelper.onCreate(this);
+        VKSdk.initialize(sdkListener, VK_APP_ID);
+        VKSdk.authorize(sMyScope, true, false);
 
         findMyViews();
         tvDate.setText("0");
@@ -163,11 +210,24 @@ public class MainActivity extends Activity {
         tvMoney.setText(String.format("%.2f", record.getMoney()));
     }
 
+    @Override
+    protected void onResume(){
+        super.onResume();
+        VKUIHelper.onResume(this);
+    }
+
     //этот метод вызывается перед уничтожением Activity
     //в этом методе мы освобождаем ресерсы
     @Override
     protected void onDestroy(){
         super.onDestroy();
+        VKUIHelper.onDestroy(this);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        VKUIHelper.onActivityResult(this, requestCode, resultCode, data);
     }
 
 
