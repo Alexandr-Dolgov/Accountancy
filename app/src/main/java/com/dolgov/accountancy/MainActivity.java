@@ -89,17 +89,13 @@ public class MainActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        findMyViews();
 
         VKSdk.initialize(sdkListener, VK_APP_ID);
         VKSdk.authorize(sMyScope, true, false);
 
-        findMyViews();
-        tvDate.setText("0");
-
+        //коннектимся к БД, получаем последнюю запись и отображаем ее
         dbAdapter = new DatabaseAdapter(this);
-        dbAdapter.selectAll();
-
-        //получаем последнюю запись из БД
         currentRecord = dbAdapter.getLastRecord();
         showCurrentRecord();
 
