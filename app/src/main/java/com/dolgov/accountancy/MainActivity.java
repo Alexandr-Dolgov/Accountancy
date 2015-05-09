@@ -139,6 +139,15 @@ public class MainActivity extends Activity {
         bPrev.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                //если текущей записи не существует в БД, т.е. мы на этапе ввода новой записи
+                //  тогда скажем что текущей записью теперь будет последняя запись из БД,
+                //  отобразим ее и выйдем из метода
+                if (currentRecord == null) {
+                    currentRecord = dbAdapter.getLastRecord();
+                    showCurrentRecord();
+                    return;
+                }
+
                 //если в базе данных существует запись с пред. датой,
                 // тогда загружаем ее
                 // иначе говорим что пред. записей нет
@@ -161,6 +170,18 @@ public class MainActivity extends Activity {
         bNext.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                if (currentRecord == null){
+                    Toast toast = Toast.makeText(getApplicationContext(),
+                            "Введите данные и нажмите кнопку =\n" +
+                                    "чтобы сохранить текущий день\n" +
+                                    "и иметь возможность\n" +
+                                    "перейти ко вводу нового дня.",
+                            Toast.LENGTH_SHORT);
+                    toast.setGravity(Gravity.CENTER, 0, 0);
+                    toast.show();
+                    return;
+                }
+
                 //если в базе данных существует запись со след. датой,
                 // тогда загружаем ее
                 // инача заносим текущую запись в БД и показываем чистый экран
@@ -175,6 +196,8 @@ public class MainActivity extends Activity {
                     clearEditTexts();
                     SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy");
                     tvDate.setText(sdf.format(currentRecord.getNextDate()));
+
+                    currentRecord = null;
                 }
             }
         });
