@@ -107,11 +107,11 @@ public class MainActivity extends Activity {
             @Override
             public void onClick(View v) {
                 //создаем новую запись по данным из полей ввода
-                //TODO старую запись брать из БД
+                //и помещаем ее в текущую
                 Record newRecord;
                 try {
                     newRecord = new Record(
-                            currentRecord,
+                            dbAdapter.getLastRecord(),
                             Double.parseDouble(etReceipt.getText().toString()),
                             Double.parseDouble(etPrepared.getText().toString()),
                             Double.parseDouble(etRemainder.getText().toString()),
@@ -126,21 +126,13 @@ public class MainActivity extends Activity {
                     toast.show();
                     return;
                 }
-                Log.d(TAG, newRecord.toString());
+                currentRecord = newRecord;
 
                 //отображаем деньги и продукты из толькочто созданной записи
                 double product = newRecord.getProduct();
                 tvProduct.setText(String.format("%.2f", product));
                 double money = newRecord.getMoney();
                 tvMoney.setText(String.format("%.2f", money));
-
-                //TODO перенисти вставку записи в БД в обработчик нажатия кнопки next
-                //а здесь лишь сохранять новую запись в текущую
-
-                //вставлем толькочто созданную запись в базу данных
-                dbAdapter.insert(newRecord);
-
-                currentRecord = newRecord;
             }
         });
 
@@ -150,7 +142,6 @@ public class MainActivity extends Activity {
                 //если в базе данных существует запись с пред. датой,
                 // тогда загружаем ее
                 // иначе говорим что пред. записей нет
-
                 Record record = dbAdapter.getPrevRecord(currentRecord);
                 if (record != null){
                     Log.d(TAG, "prev Record Exist");
@@ -172,7 +163,7 @@ public class MainActivity extends Activity {
             public void onClick(View v) {
                 //если в базе данных существует запись со след. датой,
                 // тогда загружаем ее
-                // инача показываем чистый экран
+                // инача заносим текущую запись в БД и показываем чистый экран
                 Record record = dbAdapter.getNextRecord(currentRecord);
                 if (record != null) {
                     Log.d(TAG, "next Record Exist");
@@ -180,8 +171,9 @@ public class MainActivity extends Activity {
                     showCurrentRecord();
                 } else {
                     Log.d(TAG, "next Record not Exist");
+                    dbAdapter.insert(currentRecord);
                     clearEditTexts();
-                    SimpleDateFormat sdf = new SimpleDateFormat("yyyy.MM.dd");
+                    SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy");
                     tvDate.setText(sdf.format(currentRecord.getNextDate()));
                 }
             }
@@ -202,7 +194,7 @@ public class MainActivity extends Activity {
     private void showCurrentRecord() {
         Record record = currentRecord;
 
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy.MM.dd");
+        SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy");
         tvDate.setText(sdf.format(record.getDate()));
 
         etReceipt.setText(String.format("%.2f", record.getReceipt()));

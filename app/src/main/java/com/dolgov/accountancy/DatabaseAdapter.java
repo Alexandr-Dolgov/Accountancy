@@ -16,7 +16,7 @@ public class DatabaseAdapter {
     private final String TAG = this.getClass().getName();
 
     private static final String DATABASE_NAME = "accountancy.db";
-    private static final int DATABASE_VERSION = 6;
+    private static final int DATABASE_VERSION = 7;
 
     private static final String TABLE_NAME = "mytable";
 
