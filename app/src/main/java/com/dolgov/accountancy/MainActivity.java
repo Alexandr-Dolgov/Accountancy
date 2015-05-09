@@ -106,8 +106,9 @@ public class MainActivity extends Activity {
         bCalc.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                //создаем новую запись по данным из полей ввода
+                //TODO старую запись брать из БД
                 Record newRecord;
-                //newRecord = new Record(prevRecord, 990.5, 592.56, 145, 610, 0);
                 try {
                     newRecord = new Record(
                             currentRecord,
@@ -127,14 +128,17 @@ public class MainActivity extends Activity {
                 }
                 Log.d(TAG, newRecord.toString());
 
+                //отображаем деньги и продукты из толькочто созданной записи
                 double product = newRecord.getProduct();
                 tvProduct.setText(String.format("%.2f", product));
-
                 double money = newRecord.getMoney();
                 tvMoney.setText(String.format("%.2f", money));
 
+                //TODO перенисти вставку записи в БД в обработчик нажатия кнопки next
+                //а здесь лишь сохранять новую запись в текущую
+
+                //вставлем толькочто созданную запись в базу данных
                 dbAdapter.insert(newRecord);
-                dbAdapter.selectAll();
 
                 currentRecord = newRecord;
             }
