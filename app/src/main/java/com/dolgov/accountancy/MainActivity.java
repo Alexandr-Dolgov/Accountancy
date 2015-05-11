@@ -102,6 +102,10 @@ public class MainActivity extends Activity {
         bCalc.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+
+                //TODO сделать пересчет всех последующих записей на основании текущей
+                //для этого сделать в DatabaseAdapter метод изменения той или иной записи в БД
+
                 //создаем новую запись по данным из полей ввода
                 //и помещаем ее в текущую
                 Record newRecord;
@@ -166,6 +170,8 @@ public class MainActivity extends Activity {
         bNext.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                //TODO подумать о возможности по подтверждению пользователя
+                //пропускать текущий день
                 if (currentRecord == null){
                     Toast toast = Toast.makeText(getApplicationContext(),
                             "Введите данные и нажмите кнопку =\n" +
