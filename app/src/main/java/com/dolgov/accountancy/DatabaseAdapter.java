@@ -16,7 +16,7 @@ public class DatabaseAdapter {
     private final String TAG = this.getClass().getName();
 
     private static final String DATABASE_NAME = "accountancy.db";
-    private static final int DATABASE_VERSION = 7;
+    private static final int DATABASE_VERSION = 14;
 
     private static final String TABLE_NAME = "mytable";
 
@@ -38,7 +38,7 @@ public class DatabaseAdapter {
     }
 
     public void insert(Record record){
-        Log.d(TAG, "insert(Record record)");
+        Log.d(TAG, "---insert(Record record)---");
         ContentValues cv = new ContentValues();
         cv.put(DATE_COLUMN, record.getDate().getTime());
         cv.put(RECEIPT_COLUMN, record.getReceipt());
@@ -49,63 +49,83 @@ public class DatabaseAdapter {
         cv.put(PRODUCT_COLUMN, record.getProduct());
         cv.put(MONEY_COLUMN, record.getMoney());
         database.insert(TABLE_NAME, null, cv);
+        Log.d(TAG, "---insert(Record record) end---");
     }
 
     public Record getLastRecord(){
         Log.d(TAG, "---getLastRecord()---");
         String sql = "SELECT * " +
                 " FROM " + TABLE_NAME +
-                " WHERE date=(SELECT MAX(date) FROM " + TABLE_NAME + " )";
+                " WHERE _id=(SELECT MAX(_id) FROM " + TABLE_NAME + " )";
         Cursor cursor = database.rawQuery(sql, null);
         print(cursor);
+        printSelectAll();
 
         Record record = getRecord(cursor);
         Log.d(TAG, "record = " + record);
 
         cursor.close();
 
+        Log.d(TAG, "---getLastRecord() end---");
         return record;
     }
 
-    public Record getPrevRecord(Record currentRecord){
-        Log.d(TAG, "---getPrevRecord(Record currentRecord)---");
-        Date prevDate = currentRecord.getPrevDate();
-        long unixTime = prevDate.getTime();
+    private int getRecordID(Record record){
+        long unixTime = record.getDate().getTime();
         String sql = "SELECT * " +
                 " FROM " + TABLE_NAME +
                 " WHERE date = " + unixTime;
         Cursor cursor = database.rawQuery(sql, null);
         cursor.moveToFirst();
+        if (cursor.getCount() == 0){
+            return -1;
+        } else {
+            int id = cursor.getInt(cursor.getColumnIndex(ID_COLUMN));
+            return id;
+        }
+    }
+
+    public Record getPrevRecord(Record currentRecord){
+        Log.d(TAG, "---getPrevRecord(Record currentRecord)---");
+        Log.d(TAG, "id = " + getRecordID(currentRecord));
+        String sql = "SELECT * " +
+                " FROM " + TABLE_NAME +
+                " WHERE _id = " + (getRecordID(currentRecord) - 1);
+        Cursor cursor = database.rawQuery(sql, null);
+        cursor.moveToFirst();
         if (cursor.getCount() > 0) {
+            Log.d(TAG, "---getPrevRecord(Record currentRecord) end---");
             return getRecord(cursor);
         }
 
+        Log.d(TAG, "---getPrevRecord(Record currentRecord) end---");
         return null;
     }
 
     public Record getNextRecord(Record currentRecord) {
         Log.d(TAG, "---getNextRecord(Record currentRecord)---");
-        Date nextDate = currentRecord.getNextDate();
-        long unixTime = nextDate.getTime();
+        printSelectAll();
         String sql = "SELECT * " +
                 " FROM " + TABLE_NAME +
-                " WHERE date = " + unixTime;
+                " WHERE _id = " + (getRecordID(currentRecord) + 1);
         Cursor cursor = database.rawQuery(sql, null);
         cursor.moveToFirst();
         if (cursor.getCount() > 0) {
+            Log.d(TAG, "---getNextRecord(Record currentRecord) end---");
             return getRecord(cursor);
         }
 
+        Log.d(TAG, "---getNextRecord(Record currentRecord) end---");
         return null;
     }
 
-    public void selectAll(){
-        Log.d(TAG, "---selectAll()---");
+    public void printSelectAll(){
+        Log.d(TAG, "----printSelectAll()----");
         String sql = "SELECT * " +
                 " FROM " + TABLE_NAME;
         Cursor cursor = database.rawQuery(sql, null);
         print(cursor);
-        cursor.close();
+        Log.d(TAG, "----printSelectAll() end----");
     }
 
     private Record getRecord(Cursor cursor){
@@ -136,7 +156,7 @@ public class DatabaseAdapter {
             double money = cursor.getDouble(cursor.getColumnIndex(MONEY_COLUMN));
             String res =
                     "id = " + id +
-                            " date = " + date +
+                            " date = " + date + "(" + Util.unixTimeToString(date) + ")" +
                             " receipt = " + receipt +
                             " prepared = " + prepared +
                             " remainder = " + remainder +
@@ -171,10 +191,10 @@ public class DatabaseAdapter {
                     PRODUCT_COLUMN +" REAL NOT NULL, " +
                     MONEY_COLUMN + " REAL NOT NULL);";
             db.execSQL(sql);
-            long date = (new GregorianCalendar(2015, Calendar.APRIL, 22)).getTime().getTime();
+            long date = (new GregorianCalendar(2015, Calendar.APRIL, 29)).getTime().getTime();
             db.execSQL("INSERT INTO " + TABLE_NAME +
                     " (date, receipt, prepared, remainder, sold, writeOff, product, money) " +
-                    " VALUES ( " + date + ", 0, 1689.2, 90, 2300, 0, 21002.92, 19075.52);");
+                    " VALUES ( " + date + ", 11469.0, 2385.7, 474.4, 2000, 0, 31152.28, 9534.52);");
         }
 
         @Override

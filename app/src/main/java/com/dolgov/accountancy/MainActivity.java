@@ -1,6 +1,8 @@
 package com.dolgov.accountancy;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
@@ -20,7 +22,11 @@ import com.vk.sdk.VKSdkListener;
 import com.vk.sdk.VKUIHelper;
 import com.vk.sdk.api.VKError;
 
+import java.text.ParsePosition;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
 
 public class MainActivity extends Activity {
 
@@ -110,8 +116,11 @@ public class MainActivity extends Activity {
                 //и помещаем ее в текущую
                 Record newRecord;
                 try {
+                    SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy");
+                    Date currentDate = sdf.parse(tvDate.getText().toString(), new ParsePosition(0));
                     newRecord = new Record(
                             dbAdapter.getLastRecord(),
+                            currentDate,
                             Double.parseDouble(etReceipt.getText().toString()),
                             Double.parseDouble(etPrepared.getText().toString()),
                             Double.parseDouble(etRemainder.getText().toString()),
@@ -173,6 +182,41 @@ public class MainActivity extends Activity {
                 //TODO подумать о возможности по подтверждению пользователя
                 //пропускать текущий день
                 if (currentRecord == null){
+                    AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+                    builder.setMessage("Пропустить этот день?")
+                            .setCancelable(false)
+                            .setPositiveButton("Да, пропустить",
+                                    new DialogInterface.OnClickListener() {
+                                        public void onClick(DialogInterface dialog,
+                                                            int id) {
+                                            clearEditTexts();
+
+                                            //показываем след. дату
+                                            SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy");
+                                            Date currentDate = sdf.parse(tvDate.getText().toString(), new ParsePosition(0));
+                                            GregorianCalendar calendar = new GregorianCalendar();
+                                            calendar.setTime(currentDate);
+                                            calendar.add(Calendar.DATE, 1);
+                                            Date nextDate = calendar.getTime();
+                                            tvDate.setText(sdf.format(nextDate));
+
+                                            currentRecord = null;
+
+                                            dialog.cancel();
+                                        }
+                                    })
+                            .setNegativeButton("Нет, не пропускать",
+                                    new DialogInterface.OnClickListener() {
+                                        public void onClick(DialogInterface dialog,
+                                                            int id) {
+                                            dialog.cancel();
+                                        }
+                                    });
+                    AlertDialog alert = builder.create();
+                    alert.show();
+
+
+                    /*
                     Toast toast = Toast.makeText(getApplicationContext(),
                             "Введите данные и нажмите кнопку =\n" +
                                     "чтобы сохранить текущий день\n" +
@@ -181,23 +225,37 @@ public class MainActivity extends Activity {
                             Toast.LENGTH_SHORT);
                     toast.setGravity(Gravity.CENTER, 0, 0);
                     toast.show();
+                    */
+
                     return;
                 }
 
                 //если в базе данных существует запись со след. датой,
                 // тогда загружаем ее
-                // инача заносим текущую запись в БД и показываем чистый экран
                 Record record = dbAdapter.getNextRecord(currentRecord);
                 if (record != null) {
                     Log.d(TAG, "next Record Exist");
                     currentRecord = record;
                     showCurrentRecord();
-                } else {
+                // иначе
+                } else{
                     Log.d(TAG, "next Record not Exist");
-                    dbAdapter.insert(currentRecord);
+                    //если текущая запись не совпадает с последней записью в БД
+                    // заносим текущую запись в БД
+                    if (!currentRecord.equals(dbAdapter.getLastRecord())){
+                        dbAdapter.insert(currentRecord);
+                    }
+                    //в любом случае очищаем поля
                     clearEditTexts();
+
+                    //и показываем след. дату
                     SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy");
-                    tvDate.setText(sdf.format(currentRecord.getNextDate()));
+                    Date currentDate = sdf.parse(tvDate.getText().toString(), new ParsePosition(0));
+                    GregorianCalendar calendar = new GregorianCalendar();
+                    calendar.setTime(currentDate);
+                    calendar.add(Calendar.DATE, 1);
+                    Date nextDate = calendar.getTime();
+                    tvDate.setText(sdf.format(nextDate));
 
                     currentRecord = null;
                 }

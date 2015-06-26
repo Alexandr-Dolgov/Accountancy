@@ -17,12 +17,13 @@ public class Record {
 
     public Record(
             Record prevRecord,
+            Date date,
             double receipt,
             double prepared,
             double remainder,
             double sold,
             double writeOff){
-        this.date = prevRecord.getNextDate();
+        this.date = date;
         this.receipt = receipt;
         this.prepared = prepared;
         this.remainder = remainder;
