@@ -179,8 +179,6 @@ public class MainActivity extends Activity {
         bNext.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //TODO подумать о возможности по подтверждению пользователя
-                //пропускать текущий день
                 if (currentRecord == null){
                     AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
                     builder.setMessage("Пропустить этот день?")
