@@ -22,11 +22,20 @@ import com.vk.sdk.VKSdkListener;
 import com.vk.sdk.VKUIHelper;
 import com.vk.sdk.api.VKError;
 
+import org.json.simple.JSONObject;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.net.URL;
+import java.net.URLConnection;
 import java.text.ParsePosition;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.concurrent.ExecutionException;
 
 public class MainActivity extends Activity {
 
@@ -88,7 +97,7 @@ public class MainActivity extends Activity {
 
     private static String[] sMyScope = new String[] {
             VKScope.MESSAGES,
-            VKScope.NOHTTPS
+            VKScope.DOCS
     };
 
     @Override
@@ -97,8 +106,7 @@ public class MainActivity extends Activity {
         setContentView(R.layout.activity_main);
         findMyViews();
 
-        VKSdk.initialize(sdkListener, VK_APP_ID);
-        VKSdk.authorize(sMyScope, true, false);
+        VKUIHelper.onCreate(this);
 
         //коннектимся к БД, получаем последнюю запись и отображаем ее
         dbAdapter = new DatabaseAdapter(this);
@@ -263,13 +271,95 @@ public class MainActivity extends Activity {
         bReport.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast toast = Toast.makeText(getApplicationContext(),
-                        "Еще не реализовано!",
-                        Toast.LENGTH_SHORT);
-                toast.setGravity(Gravity.CENTER, 0, 0);
-                toast.show();
+                VKSdk.initialize(sdkListener, VK_APP_ID);
+                if (VKSdk.wakeUpSession()) {
+                    Log.d(TAG, "работаем с vk");
+                    try {
+                        sendMessageVK();
+                    } catch (IOException e) {
+                        Log.d(TAG, "Ошибка при отправке сообщения\n" + e);
+                        showAlertDialog("Ошибка при отправке сообщения", e.toString());
+                        return;
+                    }
+                } else {
+                    Log.d(TAG, "авторизуемся в vk");
+                    VKSdk.authorize(sMyScope, true, false);
+                    Log.d(TAG, "работаем с vk сразу после авторизации");
+                    try {
+                        sendMessageVK();
+                    } catch (IOException e) {
+                        Log.d(TAG, "Ошибка при отправке сообщения\n" + e);
+                        showAlertDialog("Ошибка при отправке сообщения", e.toString());
+                        return;
+                    }
+                }
             }
         });
+    }
+
+    private void sendMessageVK() throws IOException {
+        VKAccessToken vkAccessToken = VKSdk.getAccessToken();
+        String access_token = vkAccessToken.accessToken;
+        Log.d(TAG, "access_token = " + access_token);
+
+        String method_name = "messages.send";
+
+        String userId;  //идентификатор пользователя которому отправляется сообщение
+        //userId = "170819313";   //идентификатор Евгения Спиридонова
+        userId = "12375097";    //идентификатор Александра Долгова
+        Log.d(TAG, "идентификатор пользователя которому отправляем сообщение user_id=" + userId);
+        String messge = "ура! заработало";
+        String parameters = "user_id=" + userId + "&message=" + messge + "&version=5.34";
+
+        String request = "https://api.vk.com/method/" + method_name + "?" +
+                parameters + "&access_token=" + access_token;
+        Log.d(TAG, "request = " + request);
+
+
+
+        //получаем upload_url куда будем сохранять документ
+        method_name = "docs.getUploadServer";
+        parameters = "version=5.34";
+        request = "https://api.vk.com/method/" + method_name + "?" +
+                parameters + "&access_token=" + access_token;
+        Log.d(TAG, "request = " + request);
+        JSONObject jsonObj = null;
+        try {
+            jsonObj = new RequestGET().execute(request).get();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        }
+        jsonObj = (JSONObject)jsonObj.get("response");
+        String uploadUrl = (String)jsonObj.get("upload_url");
+        Log.d(TAG, "upload_url = " + uploadUrl);
+
+        //сохраняем документ по полученному ранее upload_url
+        String file = "";
+        try {
+            jsonObj = new RequestPOST().execute(uploadUrl, file).get();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void showAlertDialog(String title, String message){
+        AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+        builder.setTitle(title)
+                .setMessage(message)
+                .setCancelable(false)
+                .setNegativeButton("ок",
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog,
+                                                int id) {
+                                dialog.cancel();
+                            }
+                        });
+        AlertDialog alert = builder.create();
+        alert.show();
     }
 
     private void showCurrentRecord() {
