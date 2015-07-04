@@ -28,6 +28,7 @@ public class RequestGET extends AsyncTask<String, Void, JSONObject> {
         try{
             URLConnection conn = (new URL(urls[0])).openConnection();
             BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+            //TODO проверить на строчках длиннее 255 символов
             json = reader.readLine();
             reader.close();
 

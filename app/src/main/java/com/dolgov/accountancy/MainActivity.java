@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.res.Resources;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Gravity;
@@ -22,6 +23,7 @@ import com.vk.sdk.VKSdkListener;
 import com.vk.sdk.VKUIHelper;
 import com.vk.sdk.api.VKError;
 
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
 import java.io.BufferedReader;
@@ -335,15 +337,67 @@ public class MainActivity extends Activity {
         String uploadUrl = (String)jsonObj.get("upload_url");
         Log.d(TAG, "upload_url = " + uploadUrl);
 
-        //сохраняем документ по полученному ранее upload_url
-        String file = "";
+        //загружаем документ на сервер по полученному ранее upload_url
         try {
-            jsonObj = new RequestPOST().execute(uploadUrl, file).get();
+            jsonObj = new RequestPOST(this).execute(uploadUrl).get();
         } catch (InterruptedException e) {
             e.printStackTrace();
         } catch (ExecutionException e) {
             e.printStackTrace();
         }
+        String file = (String)jsonObj.get("file");
+        Log.d(TAG, "file = " + file);
+
+        //сохраняем загруженный документ
+        method_name = "docs.save";
+        parameters = "file=" + file + "" +
+                "&title=docName" +
+                "&version=5.34";
+        request = "https://api.vk.com/method/" + method_name + "?" +
+                parameters + "&access_token=" + access_token;
+        Log.d(TAG, "request = " + request);
+        jsonObj = null;
+        try {
+            jsonObj = new RequestGET().execute(request).get();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        }
+        JSONArray jsonArray = (JSONArray) jsonObj.get("response");
+        Log.d(TAG, jsonArray.toString());
+        jsonObj = (JSONObject) jsonArray.get(0);
+        Long did = (Long)jsonObj.get("did");
+        Log.d(TAG, "did = " + did);
+
+        //отправляем сообщение с приаттаченым по id ранее загруженным документом
+
+        String type = "doc";
+        long owner_id = (Long)jsonObj.get("owner_id");
+        long media_id = did;
+        String attachment = type + owner_id + "_" + media_id;
+
+        method_name = "messages.send";
+        //userId = "170819313";   //идентификатор Евгения Спиридонова
+        userId = "12375097";    //идентификатор Александра Долгова
+        Log.d(TAG, "идентификатор пользователя которому отправляем сообщение user_id=" + userId);
+        messge = "ура! заработало";
+        parameters = "user_id=" + userId +
+                "&attachment=" + attachment +
+                "&version=5.34";
+        request = "https://api.vk.com/method/" + method_name + "?" +
+                parameters + "&access_token=" + access_token;
+        Log.d(TAG, "request = " + request);
+        jsonObj = null;
+        try {
+            jsonObj = new RequestGET().execute(request).get();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        }
+
+
     }
 
     private void showAlertDialog(String title, String message){
