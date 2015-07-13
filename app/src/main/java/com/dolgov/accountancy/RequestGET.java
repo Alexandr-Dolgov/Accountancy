@@ -15,6 +15,7 @@ import java.net.URLConnection;
 
 /**
  * Created by Alexandr on 28.06.2015.
+ * GET должен корректно работать при запросах до 2kb
  */
 public class RequestGET extends AsyncTask<String, Void, JSONObject> {
 
@@ -26,9 +27,12 @@ public class RequestGET extends AsyncTask<String, Void, JSONObject> {
     @Override
     protected JSONObject doInBackground(String... urls) {
         try{
+            //urls[0] -- обязательно URL строка
+            // соответствующим образом закодированная,
+            // например с помощью URLEncoder.encode(str, "UTF-8");
             URLConnection conn = (new URL(urls[0])).openConnection();
-            BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-            //TODO проверить на строчках длиннее 255 символов
+            InputStreamReader isr = new InputStreamReader(conn.getInputStream());
+            BufferedReader reader = new BufferedReader(isr);
             json = reader.readLine();
             reader.close();
 

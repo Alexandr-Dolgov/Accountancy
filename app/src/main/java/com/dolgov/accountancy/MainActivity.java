@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.res.Resources;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Gravity;
@@ -26,12 +25,8 @@ import com.vk.sdk.api.VKError;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
-import java.net.URL;
-import java.net.URLConnection;
+import java.net.URLEncoder;
 import java.text.ParsePosition;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -304,20 +299,13 @@ public class MainActivity extends Activity {
         String access_token = vkAccessToken.accessToken;
         Log.d(TAG, "access_token = " + access_token);
 
-        String method_name = "messages.send";
-
-        String userId;  //идентификатор пользователя которому отправляется сообщение
-        //userId = "170819313";   //идентификатор Евгения Спиридонова
-        userId = "12375097";    //идентификатор Александра Долгова
-        Log.d(TAG, "идентификатор пользователя которому отправляем сообщение user_id=" + userId);
-        String messge = "ура! заработало";
-        String parameters = "user_id=" + userId + "&message=" + messge + "&version=5.34";
-
-        String request = "https://api.vk.com/method/" + method_name + "?" +
-                parameters + "&access_token=" + access_token;
-        Log.d(TAG, "request = " + request);
-
-
+        //определяем переменные для формирования запросов к API vk.com
+        String method_name;
+        String userId;
+        String message;
+        String parameters;
+        String request;
+        JSONObject jsonObj = null;
 
         //получаем upload_url куда будем сохранять документ
         method_name = "docs.getUploadServer";
@@ -325,7 +313,7 @@ public class MainActivity extends Activity {
         request = "https://api.vk.com/method/" + method_name + "?" +
                 parameters + "&access_token=" + access_token;
         Log.d(TAG, "request = " + request);
-        JSONObject jsonObj = null;
+        jsonObj = null;
         try {
             jsonObj = new RequestGET().execute(request).get();
         } catch (InterruptedException e) {
@@ -351,7 +339,7 @@ public class MainActivity extends Activity {
         //сохраняем загруженный документ
         method_name = "docs.save";
         parameters = "file=" + file + "" +
-                "&title=docName" +
+                "&title=f1.xls" +
                 "&version=5.34";
         request = "https://api.vk.com/method/" + method_name + "?" +
                 parameters + "&access_token=" + access_token;
@@ -371,18 +359,17 @@ public class MainActivity extends Activity {
         Log.d(TAG, "did = " + did);
 
         //отправляем сообщение с приаттаченым по id ранее загруженным документом
-
         String type = "doc";
         long owner_id = (Long)jsonObj.get("owner_id");
         long media_id = did;
         String attachment = type + owner_id + "_" + media_id;
-
         method_name = "messages.send";
         //userId = "170819313";   //идентификатор Евгения Спиридонова
         userId = "12375097";    //идентификатор Александра Долгова
         Log.d(TAG, "идентификатор пользователя которому отправляем сообщение user_id=" + userId);
-        messge = "ура! заработало";
+        message = URLEncoder.encode("бухгалтерия за имяМесяца", "UTF-8");
         parameters = "user_id=" + userId +
+                "&message=" + message +
                 "&attachment=" + attachment +
                 "&version=5.34";
         request = "https://api.vk.com/method/" + method_name + "?" +
@@ -396,8 +383,6 @@ public class MainActivity extends Activity {
         } catch (ExecutionException e) {
             e.printStackTrace();
         }
-
-
     }
 
     private void showAlertDialog(String title, String message){

@@ -7,20 +7,12 @@ import android.util.Log;
 
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
 
-import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.io.PrintWriter;
-import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
-import java.net.URLEncoder;
 
 /**
  * Created by Alexandr on 29.06.2015.
@@ -54,11 +46,15 @@ public class RequestPOST extends AsyncTask<String, Void, JSONObject> {
             OutputStream os = connection.getOutputStream();
             String delimetr = "--";
             os.write( (delimetr + boundary + "\r\n").getBytes() );
-            String filename = "f1.pdf";
-            os.write( ("Content-Disposition: form-data; " +
+            String filename = "f1.xls";
+            String contentDisposition = "Content-Disposition: form-data; " +
                     "name=\"file\"; " +
-                    "filename=\"" + filename + "\"\r\n").getBytes() );
-            os.write("Content-Type: application/pdf".getBytes());
+                    "filename=\"" + filename + "\"\r\n";
+            contentDisposition = "Content-Disposition: form-data; name=\"file\"; filename=\"ff\"\r\n";
+            os.write( contentDisposition.getBytes() );
+            os.write("Content-Type: application/vnd.ms-excel\r\n\r\n".getBytes());
+
+
 
             Resources r = activity.getResources();
             InputStream is = r.openRawResource(R.raw.f1);
