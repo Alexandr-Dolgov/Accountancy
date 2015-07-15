@@ -5,6 +5,7 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.Menu;
@@ -22,11 +23,19 @@ import com.vk.sdk.VKSdkListener;
 import com.vk.sdk.VKUIHelper;
 import com.vk.sdk.api.VKError;
 
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URLEncoder;
+import java.net.UnknownHostException;
 import java.text.ParsePosition;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -271,30 +280,76 @@ public class MainActivity extends Activity {
                 VKSdk.initialize(sdkListener, VK_APP_ID);
                 if (VKSdk.wakeUpSession()) {
                     Log.d(TAG, "работаем с vk");
-                    try {
-                        sendMessageVK();
-                    } catch (IOException e) {
-                        Log.d(TAG, "Ошибка при отправке сообщения\n" + e);
-                        showAlertDialog("Ошибка при отправке сообщения", e.toString());
-                        return;
-                    }
+                    report();
+
                 } else {
                     Log.d(TAG, "авторизуемся в vk");
                     VKSdk.authorize(sMyScope, true, false);
                     Log.d(TAG, "работаем с vk сразу после авторизации");
-                    try {
-                        sendMessageVK();
-                    } catch (IOException e) {
-                        Log.d(TAG, "Ошибка при отправке сообщения\n" + e);
-                        showAlertDialog("Ошибка при отправке сообщения", e.toString());
-                        return;
-                    }
+                    report();
                 }
             }
         });
     }
 
+    private void report() {
+        //получаем дату последний записи в БД
+        Date lastDate = dbAdapter.getLastRecord().getDate();
+        Calendar calendar = new GregorianCalendar();
+        calendar.setTime(lastDate);
+
+        //вычисляем по ней имяМесяца
+        int numCurrentMonth = calendar.get(Calendar.MONTH);
+        String currentMonth = Util.month(numCurrentMonth);
+        Log.d(TAG, "currentMonth = " + currentMonth);
+
+        //вычисляем имяПредМесяца
+        String prevMonth = Util.prevMonth(numCurrentMonth);
+        Log.d(TAG, "prevMonth = " + prevMonth);
+
+        //показываем пользователю диалог выбора месяца который нужно экспортнуть в xls и отправить
+
+
+
+        //выбираем из БД все записи где дата относится к выбранному пользователем месяцу
+        //по массиву выбранных записей формируем xls файл
+        //и отправляем его
+
+        try{
+            sendMessageVK();
+        } catch (IOException e){
+            showAlertDialog("Ошибка при отправке сообщения", e.toString());
+            return;
+        }
+
+        //сообщаем о успешной отправке отчета
+    }
+
+    private File createXlsReport(){
+        Workbook wb = new HSSFWorkbook();
+        Sheet sheet = wb.createSheet();
+        Row row = sheet.createRow(0);
+        Cell cell = row.createCell(0);
+        cell.setCellValue(2.71828);
+
+        // Write the output to a file
+        String dirPath = getApplicationInfo().dataDir;
+        String fileName = "demo.xls";
+        File file = new File(dirPath, fileName);
+        Log.d(TAG, "xlsFile AbsolutePath = " + file.getAbsolutePath());
+        try {
+            FileOutputStream out = new FileOutputStream(file);
+            wb.write(out);
+            out.close();
+        } catch (IOException e){
+            e.printStackTrace();
+        }
+
+        return file;
+    }
+
     private void sendMessageVK() throws IOException {
+
         VKAccessToken vkAccessToken = VKSdk.getAccessToken();
         String access_token = vkAccessToken.accessToken;
         Log.d(TAG, "access_token = " + access_token);
@@ -321,13 +376,20 @@ public class MainActivity extends Activity {
         } catch (ExecutionException e) {
             e.printStackTrace();
         }
-        jsonObj = (JSONObject)jsonObj.get("response");
+        try {
+            jsonObj = (JSONObject)jsonObj.get("response");
+        } catch (Exception e){
+            e.printStackTrace();
+            showAlertDialog("Ошибка. Убедитесь в наличии доступа в интернет", e.toString());
+            return;
+        }
         String uploadUrl = (String)jsonObj.get("upload_url");
         Log.d(TAG, "upload_url = " + uploadUrl);
 
         //загружаем документ на сервер по полученному ранее upload_url
+        File fileXlsReport = createXlsReport();
         try {
-            jsonObj = new RequestPOST(this).execute(uploadUrl).get();
+            jsonObj = new RequestPOST(this, fileXlsReport).execute(uploadUrl).get();
         } catch (InterruptedException e) {
             e.printStackTrace();
         } catch (ExecutionException e) {
@@ -339,7 +401,7 @@ public class MainActivity extends Activity {
         //сохраняем загруженный документ
         method_name = "docs.save";
         parameters = "file=" + file + "" +
-                "&title=f1.xls" +
+                "&title=" + fileXlsReport.getName() +
                 "&version=5.34";
         request = "https://api.vk.com/method/" + method_name + "?" +
                 parameters + "&access_token=" + access_token;
