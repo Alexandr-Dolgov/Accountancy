@@ -8,6 +8,8 @@ import android.util.Log;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
@@ -21,12 +23,11 @@ public class RequestPOST extends AsyncTask<String, Void, JSONObject> {
     private final String TAG = this.getClass().getName();
 
     private Activity activity;
+    private File file;
 
-    private String json;
-    JSONObject jsonObj;
-
-    public RequestPOST(Activity activity){
+    public RequestPOST(Activity activity, File file){
         this.activity = activity;
+        this.file = file;
     }
 
     @Override
@@ -44,27 +45,24 @@ public class RequestPOST extends AsyncTask<String, Void, JSONObject> {
             connection.setRequestProperty("Content-Type", "multipart/form-data; boundary=" + boundary);
             connection.connect();
             OutputStream os = connection.getOutputStream();
-            String delimetr = "--";
-            os.write( (delimetr + boundary + "\r\n").getBytes() );
-            String filename = "f1.xls";
+            String delimiter = "--";
+            os.write( (delimiter + boundary + "\r\n").getBytes() );
+            String fileName = file.getName();
             String contentDisposition = "Content-Disposition: form-data; " +
                     "name=\"file\"; " +
-                    "filename=\"" + filename + "\"\r\n";
-            contentDisposition = "Content-Disposition: form-data; name=\"file\"; filename=\"ff\"\r\n";
+                    "filename=\"" + fileName + "\"" +
+                    "\r\n";
             os.write( contentDisposition.getBytes() );
             os.write("Content-Type: application/vnd.ms-excel\r\n\r\n".getBytes());
 
-
-
-            Resources r = activity.getResources();
-            InputStream is = r.openRawResource(R.raw.f1);
+            InputStream is = new FileInputStream(file);
             byte[] b = new byte[1024];
             while ( is.read(b) != -1) {
                 os.write(b);
             }
 
             os.write("\r\n".getBytes());
-            os.write( (delimetr + boundary + delimetr + "\r\n").getBytes() );
+            os.write( (delimiter + boundary + delimiter + "\r\n").getBytes() );
 
             //считываем ответ
             is = connection.getInputStream();
