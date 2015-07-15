@@ -24,4 +24,5 @@ dependencies {
     compile 'com.android.support:appcompat-v7:21.0.3'
     compile 'com.vk:androidsdk:+'
     compile 'com.googlecode.json-simple:json-simple:1.1'
+    compile 'org.apache.poi:poi:3.12'
 }
