@@ -1,5 +1,6 @@
 package com.dolgov.accountancy;
 
+import android.app.Activity;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
@@ -7,6 +8,17 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
@@ -31,10 +43,12 @@ public class DatabaseAdapter {
     private static final String MONEY_COLUMN = "money";
 
     private SQLiteDatabase database;
+    private Activity activity;
 
-    public DatabaseAdapter (Context context) {
+    public DatabaseAdapter (Context context, Activity activity) {
         DBOpenHelper dbOpenHelper = new DBOpenHelper(context);
         database = dbOpenHelper.getWritableDatabase();
+        this.activity = activity;
     }
 
     public void insert(Record record){
@@ -167,6 +181,29 @@ public class DatabaseAdapter {
             Log.d(TAG, res);
         } while (cursor.moveToNext());
         cursor.moveToFirst();
+    }
+
+    public File createXLS(int numMonth) {
+        Workbook wb = new HSSFWorkbook();
+        Sheet sheet = wb.createSheet();
+        Row row = sheet.createRow(0);
+        Cell cell = row.createCell(0);
+        cell.setCellValue(numMonth);
+
+        // Write the output to a file
+        String dirPath = activity.getApplicationInfo().dataDir;
+        String fileName = Util.monthToString(numMonth) + ".xls";
+        File file = new File(dirPath, fileName);
+        Log.d(TAG, "xlsFile AbsolutePath = " + file.getAbsolutePath());
+        try {
+            FileOutputStream out = new FileOutputStream(file);
+            wb.write(out);
+            out.close();
+        } catch (IOException e){
+            e.printStackTrace();
+        }
+
+        return file;
     }
 
     private class DBOpenHelper extends SQLiteOpenHelper {
