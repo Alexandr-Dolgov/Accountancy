@@ -14,7 +14,7 @@ public class Util {
         return sdf.format(date);
     }
 
-    public static String month(int numMonth){
+    public static String monthToString(int numMonth){
         String monthString;
         switch (numMonth) {
             case 0:  monthString = "Январь";
@@ -47,13 +47,13 @@ public class Util {
         return monthString;
     }
 
-    public static String prevMonth(int numThisMonth){
+    public static int numPrevMonth(int numCurrentMonth){
         int numPrevMonth;
-        if (numThisMonth == 0){
+        if (numCurrentMonth == 0){
             numPrevMonth = 11;
         } else {
-            numPrevMonth = numThisMonth - 1;
+            numPrevMonth = numCurrentMonth - 1;
         }
-        return month(numPrevMonth);
+        return numPrevMonth;
     }
 }
