@@ -22,16 +22,10 @@ import com.vk.sdk.VKSdkListener;
 import com.vk.sdk.VKUIHelper;
 import com.vk.sdk.api.VKError;
 
-import org.apache.poi.hssf.usermodel.HSSFWorkbook;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.text.ParsePosition;
@@ -70,7 +64,6 @@ public class MainActivity extends Activity {
     //переменные хрянящие номер месяца для отправки отчета
     private int numCurrentMonth;
     private int numPrevMonth;
-    private int numSelectedMonth;
 
     private final VKSdkListener sdkListener = new VKSdkListener() {
         @Override
@@ -295,9 +288,6 @@ public class MainActivity extends Activity {
         numPrevMonth = Util.numPrevMonth(numCurrentMonth);
         String prevMonth = Util.monthToString(numPrevMonth);
 
-        //определяем переменную где будет храниться номер выбранного месяца
-        numSelectedMonth = -1; //первоначальное значиние говорит что никакой месяц еще не выбран
-
         //показываем пользователю диалог выбора месяца который нужно экспортнуть в xls и отправить
         AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
         builder.setMessage("За какой месяц отправить отчет?")
@@ -354,7 +344,7 @@ public class MainActivity extends Activity {
         String message;
         String parameters;
         String request;
-        JSONObject jsonObj = null;
+        JSONObject jsonObj;
 
         //получаем upload_url куда будем сохранять документ
         method_name = "docs.getUploadServer";
@@ -365,16 +355,13 @@ public class MainActivity extends Activity {
         jsonObj = null;
         try {
             jsonObj = new RequestGET().execute(request).get();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        } catch (ExecutionException e) {
+        } catch (InterruptedException | ExecutionException e) {
             e.printStackTrace();
         }
-        try {
+        if (jsonObj != null) {
             jsonObj = (JSONObject)jsonObj.get("response");
-        } catch (Exception e){
-            e.printStackTrace();
-            showAlertDialog("Ошибка. Убедитесь в наличии доступа в интернет", e.toString());
+        } else {
+            showAlertDialog("Ошибка. Убедитесь в наличии доступа в интернет", "");
             return;
         }
         String uploadUrl = (String)jsonObj.get("upload_url");
@@ -383,9 +370,7 @@ public class MainActivity extends Activity {
         //загружаем документ на сервер по полученному ранее upload_url
         try {
             jsonObj = new RequestPOST(this, fileXlsReport).execute(uploadUrl).get();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        } catch (ExecutionException e) {
+        } catch (InterruptedException | ExecutionException e) {
             e.printStackTrace();
         }
         String file = (String)jsonObj.get("file");
@@ -403,9 +388,7 @@ public class MainActivity extends Activity {
         jsonObj = null;
         try {
             jsonObj = new RequestGET().execute(request).get();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        } catch (ExecutionException e) {
+        } catch (InterruptedException | ExecutionException e) {
             e.printStackTrace();
         }
         JSONArray jsonArray = (JSONArray) jsonObj.get("response");
@@ -431,12 +414,9 @@ public class MainActivity extends Activity {
         request = "https://api.vk.com/method/" + method_name + "?" +
                 parameters + "&access_token=" + access_token;
         Log.d(TAG, "request = " + request);
-        jsonObj = null;
         try {
-            jsonObj = new RequestGET().execute(request).get();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        } catch (ExecutionException e) {
+            new RequestGET().execute(request).get();
+        } catch (InterruptedException | ExecutionException e) {
             e.printStackTrace();
         }
     }
