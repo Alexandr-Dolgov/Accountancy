@@ -5,7 +5,6 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
-import android.provider.MediaStore;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.Menu;
@@ -35,7 +34,6 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URLEncoder;
-import java.net.UnknownHostException;
 import java.text.ParsePosition;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -68,6 +66,11 @@ public class MainActivity extends Activity {
     private DatabaseAdapter dbAdapter;
 
     private static final String VK_APP_ID = "4902641";
+
+    //переменные хрянящие номер месяца для отправки отчета
+    private int numCurrentMonth;
+    private int numPrevMonth;
+    private int numSelectedMonth;
 
     private final VKSdkListener sdkListener = new VKSdkListener() {
         @Override
@@ -115,7 +118,7 @@ public class MainActivity extends Activity {
         VKUIHelper.onCreate(this);
 
         //коннектимся к БД, получаем последнюю запись и отображаем ее
-        dbAdapter = new DatabaseAdapter(this);
+        dbAdapter = new DatabaseAdapter(this, this);
         currentRecord = dbAdapter.getLastRecord();
         showCurrentRecord();
 
@@ -227,18 +230,6 @@ public class MainActivity extends Activity {
                     AlertDialog alert = builder.create();
                     alert.show();
 
-
-                    /*
-                    Toast toast = Toast.makeText(getApplicationContext(),
-                            "Введите данные и нажмите кнопку =\n" +
-                                    "чтобы сохранить текущий день\n" +
-                                    "и иметь возможность\n" +
-                                    "перейти ко вводу нового дня.",
-                            Toast.LENGTH_SHORT);
-                    toast.setGravity(Gravity.CENTER, 0, 0);
-                    toast.show();
-                    */
-
                     return;
                 }
 
@@ -298,57 +289,60 @@ public class MainActivity extends Activity {
         Calendar calendar = new GregorianCalendar();
         calendar.setTime(lastDate);
 
-        //вычисляем по ней имяМесяца
-        int numCurrentMonth = calendar.get(Calendar.MONTH);
-        String currentMonth = Util.month(numCurrentMonth);
-        Log.d(TAG, "currentMonth = " + currentMonth);
+        //вычисляем по ней номера и имена текущего и предыдушего месяцев
+        numCurrentMonth = calendar.get(Calendar.MONTH);
+        String currentMonth = Util.monthToString(numCurrentMonth);
+        numPrevMonth = Util.numPrevMonth(numCurrentMonth);
+        String prevMonth = Util.monthToString(numPrevMonth);
 
-        //вычисляем имяПредМесяца
-        String prevMonth = Util.prevMonth(numCurrentMonth);
-        Log.d(TAG, "prevMonth = " + prevMonth);
+        //определяем переменную где будет храниться номер выбранного месяца
+        numSelectedMonth = -1; //первоначальное значиние говорит что никакой месяц еще не выбран
 
         //показываем пользователю диалог выбора месяца который нужно экспортнуть в xls и отправить
+        AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+        builder.setMessage("За какой месяц отправить отчет?")
+                .setCancelable(false)
+                .setPositiveButton(prevMonth,
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog,
+                                                int id) {
+                                //запускаем метод который по номеру месяца вернет xls файл
+                                //сформированный из записей из БД с указанным номером месяца
+                                sendReport(numPrevMonth);
+                                dialog.cancel();
+                            }
+                        })
+                .setNegativeButton(currentMonth,
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog,
+                                                int id) {
+                                sendReport(numCurrentMonth);
+                                dialog.cancel();
+                            }
+                        });
+        AlertDialog alert = builder.create();
+        alert.show();
+    }
 
-
-
-        //выбираем из БД все записи где дата относится к выбранному пользователем месяцу
-        //по массиву выбранных записей формируем xls файл
-        //и отправляем его
-
+    private void sendReport(int numMonth){
+        File xlsFile = dbAdapter.createXLS(numMonth);
+        //отправляем сформированный XLS файл
         try{
-            sendMessageVK();
+            sendMessageVK(xlsFile);
         } catch (IOException e){
             showAlertDialog("Ошибка при отправке сообщения", e.toString());
             return;
         }
 
         //сообщаем о успешной отправке отчета
+        Toast toast = Toast.makeText(getApplicationContext(),
+                "Отчет отправлен",
+                Toast.LENGTH_SHORT);
+        toast.setGravity(Gravity.CENTER, 0, 0);
+        toast.show();
     }
 
-    private File createXlsReport(){
-        Workbook wb = new HSSFWorkbook();
-        Sheet sheet = wb.createSheet();
-        Row row = sheet.createRow(0);
-        Cell cell = row.createCell(0);
-        cell.setCellValue(2.71828);
-
-        // Write the output to a file
-        String dirPath = getApplicationInfo().dataDir;
-        String fileName = "demo.xls";
-        File file = new File(dirPath, fileName);
-        Log.d(TAG, "xlsFile AbsolutePath = " + file.getAbsolutePath());
-        try {
-            FileOutputStream out = new FileOutputStream(file);
-            wb.write(out);
-            out.close();
-        } catch (IOException e){
-            e.printStackTrace();
-        }
-
-        return file;
-    }
-
-    private void sendMessageVK() throws IOException {
+    private void sendMessageVK(File fileXlsReport) throws IOException {
 
         VKAccessToken vkAccessToken = VKSdk.getAccessToken();
         String access_token = vkAccessToken.accessToken;
@@ -387,7 +381,6 @@ public class MainActivity extends Activity {
         Log.d(TAG, "upload_url = " + uploadUrl);
 
         //загружаем документ на сервер по полученному ранее upload_url
-        File fileXlsReport = createXlsReport();
         try {
             jsonObj = new RequestPOST(this, fileXlsReport).execute(uploadUrl).get();
         } catch (InterruptedException e) {
@@ -400,8 +393,9 @@ public class MainActivity extends Activity {
 
         //сохраняем загруженный документ
         method_name = "docs.save";
+        String title = URLEncoder.encode(fileXlsReport.getName(), "UTF-8");
         parameters = "file=" + file + "" +
-                "&title=" + fileXlsReport.getName() +
+                "&title=" + title +
                 "&version=5.34";
         request = "https://api.vk.com/method/" + method_name + "?" +
                 parameters + "&access_token=" + access_token;
@@ -429,7 +423,7 @@ public class MainActivity extends Activity {
         //userId = "170819313";   //идентификатор Евгения Спиридонова
         userId = "12375097";    //идентификатор Александра Долгова
         Log.d(TAG, "идентификатор пользователя которому отправляем сообщение user_id=" + userId);
-        message = URLEncoder.encode("бухгалтерия за имяМесяца", "UTF-8");
+        message = URLEncoder.encode("бухгалтерия за " + fileXlsReport.getName(), "UTF-8");
         parameters = "user_id=" + userId +
                 "&message=" + message +
                 "&attachment=" + attachment +
