@@ -1,7 +1,5 @@
 package com.dolgov.accountancy;
 
-import android.app.Activity;
-import android.content.res.Resources;
 import android.os.AsyncTask;
 import android.util.Log;
 
@@ -17,16 +15,16 @@ import java.net.URL;
 import java.net.URLConnection;
 
 /**
+ * Класс реализующий отправку файла с помощью POST-запроса.
+ * Файл хранится в поле класса File file, и передается в это поле в конструкторе.
  * Created by Alexandr on 29.06.2015.
  */
 public class RequestPOST extends AsyncTask<String, Void, JSONObject> {
     private final String TAG = this.getClass().getName();
 
-    private Activity activity;
     private File file;
 
-    public RequestPOST(Activity activity, File file){
-        this.activity = activity;
+    public RequestPOST(File file){
         this.file = file;
     }
 
@@ -67,12 +65,12 @@ public class RequestPOST extends AsyncTask<String, Void, JSONObject> {
             //считываем ответ
             is = connection.getInputStream();
             byte[] b1 = new byte[1];
-            StringBuffer buffer = new StringBuffer();
+            StringBuilder stringBuilder = new StringBuilder();
             while ( is.read(b1) != -1)
-                buffer.append(new String(b1));
+                stringBuilder.append(new String(b1));
             connection.disconnect();
 
-            String jsonString = buffer.toString();
+            String jsonString = stringBuilder.toString();
             Log.d(TAG, "jsonString = " + jsonString);
 
             Object obj = new JSONParser().parse(jsonString);

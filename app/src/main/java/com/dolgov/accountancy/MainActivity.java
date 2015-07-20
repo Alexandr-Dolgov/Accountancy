@@ -376,7 +376,7 @@ public class MainActivity extends Activity {
 
         //загружаем документ на сервер по полученному ранее upload_url
         try {
-            jsonObj = new RequestPOST(this, fileXlsReport).execute(uploadUrl).get();
+            jsonObj = new RequestPOST(fileXlsReport).execute(uploadUrl).get();
         } catch (InterruptedException | ExecutionException e) {
             e.printStackTrace();
         }
