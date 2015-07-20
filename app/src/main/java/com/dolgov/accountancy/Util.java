@@ -1,16 +1,23 @@
 package com.dolgov.accountancy;
 
+import android.util.Log;
+
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
+import java.util.GregorianCalendar;
 
 /**
  * Created by Alexandr on 26.06.2015.
  */
 public class Util {
+
+    private static final String TAG = Util.class.getName();
+
     public static String unixTimeToString(long unixTime){
         Date date = new Date();
         date.setTime(unixTime);
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy.MM.dd");
+        SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy");
         return sdf.format(date);
     }
 
@@ -55,5 +62,33 @@ public class Util {
             numPrevMonth = numCurrentMonth - 1;
         }
         return numPrevMonth;
+    }
+
+    public static int yearOfPrevMonth(int numCurrentMonth, int yearOfCurrentMonth){
+        if (numCurrentMonth == 0){
+            return yearOfCurrentMonth - 1;
+        } else {
+            return yearOfCurrentMonth;
+        }
+    }
+
+    //TODO проверить
+    public static long unixTimeBeginMonth(int year, int month){
+        Calendar calendar = new GregorianCalendar(year, month, 1);
+        long unixTime = calendar.getTime().getTime();
+        Log.d(TAG, "dateBeginMonth = " + unixTimeToString(unixTime));
+        Log.d(TAG, "unixTimeBeginMonth = " + unixTime);
+        return unixTime;
+    }
+
+    //TODO проверить
+    public static long unixTimeEndMonth(int year, int month){
+        Calendar calendar = new GregorianCalendar(year, month, 1);
+        int day = calendar.getActualMaximum(Calendar.DAY_OF_MONTH);
+        calendar = new GregorianCalendar(year, month, day);
+        long unixTime = calendar.getTime().getTime();
+        Log.d(TAG, "dateEndMonth = " + unixTimeToString(unixTime));
+        Log.d(TAG, "unixTimeEndMonth = " + unixTime);
+        return unixTime;
     }
 }
