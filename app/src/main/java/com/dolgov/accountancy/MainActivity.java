@@ -64,6 +64,8 @@ public class MainActivity extends Activity {
     //переменные хрянящие номер месяца для отправки отчета
     private int numCurrentMonth;
     private int numPrevMonth;
+    private int yearOfCurrentMonth;
+    private int yearOfPrevMonth;
 
     private final VKSdkListener sdkListener = new VKSdkListener() {
         @Override
@@ -288,6 +290,11 @@ public class MainActivity extends Activity {
         numPrevMonth = Util.numPrevMonth(numCurrentMonth);
         String prevMonth = Util.monthToString(numPrevMonth);
 
+        yearOfCurrentMonth = calendar.get(Calendar.YEAR);
+        Log.d(TAG, "yearOfCurrentMonth = " + yearOfCurrentMonth);
+
+        yearOfPrevMonth = Util.yearOfPrevMonth(numCurrentMonth, yearOfCurrentMonth);
+
         //показываем пользователю диалог выбора месяца который нужно экспортнуть в xls и отправить
         AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
         builder.setMessage("За какой месяц отправить отчет?")
@@ -298,7 +305,7 @@ public class MainActivity extends Activity {
                                                 int id) {
                                 //запускаем метод который по номеру месяца вернет xls файл
                                 //сформированный из записей из БД с указанным номером месяца
-                                sendReport(numPrevMonth);
+                                sendReport(numPrevMonth, yearOfPrevMonth);
                                 dialog.cancel();
                             }
                         })
@@ -306,7 +313,7 @@ public class MainActivity extends Activity {
                         new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog,
                                                 int id) {
-                                sendReport(numCurrentMonth);
+                                sendReport(numCurrentMonth, yearOfCurrentMonth);
                                 dialog.cancel();
                             }
                         });
@@ -314,8 +321,8 @@ public class MainActivity extends Activity {
         alert.show();
     }
 
-    private void sendReport(int numMonth){
-        File xlsFile = dbAdapter.createXLS(numMonth);
+    private void sendReport(int numMonth, int year){
+        File xlsFile = dbAdapter.createXLS(numMonth, year);
         //отправляем сформированный XLS файл
         try{
             sendMessageVK(xlsFile);
@@ -421,7 +428,7 @@ public class MainActivity extends Activity {
         }
     }
 
-    private void showAlertDialog(String title, String message){
+    public void showAlertDialog(String title, String message){
         AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
         builder.setTitle(title)
                 .setMessage(message)
