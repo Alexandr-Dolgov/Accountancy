@@ -398,11 +398,20 @@ public class MainActivity extends Activity {
         } catch (InterruptedException | ExecutionException e) {
             e.printStackTrace();
         }
-        JSONArray jsonArray = (JSONArray) jsonObj.get("response");
-        Log.d(TAG, jsonArray.toString());
-        jsonObj = (JSONObject) jsonArray.get(0);
-        Long did = (Long)jsonObj.get("did");
-        Log.d(TAG, "did = " + did);
+
+        //получаем did -- идентификатор сохраненного документа
+        long did;
+        if (jsonObj != null){
+            JSONArray jsonArray = (JSONArray) jsonObj.get("response");
+            Log.d(TAG, jsonArray.toString());
+            jsonObj = (JSONObject) jsonArray.get(0);
+            did = (long)jsonObj.get("did");
+            Log.d(TAG, "did = " + did);
+        } else {
+            showAlertDialog("Ошибка", "в классе MainActivity в методе sendMessageVK " +
+                    "при получении ответа от vk.com после сохранения загруженного документа");
+            return;
+        }
 
         //отправляем сообщение с приаттаченым по id ранее загруженным документом
         String type = "doc";
