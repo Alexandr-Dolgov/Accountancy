@@ -21,11 +21,9 @@ public class RequestGET extends AsyncTask<String, Void, JSONObject> {
 
     private final String TAG = this.getClass().getName();
 
-    private String json;
-    JSONObject jsonObj;
-
     @Override
     protected JSONObject doInBackground(String... urls) {
+        JSONObject jsonObj;
         try{
             //urls[0] -- обязательно URL строка
             // соответствующим образом закодированная,
@@ -33,10 +31,10 @@ public class RequestGET extends AsyncTask<String, Void, JSONObject> {
             URLConnection conn = (new URL(urls[0])).openConnection();
             InputStreamReader isr = new InputStreamReader(conn.getInputStream());
             BufferedReader reader = new BufferedReader(isr);
-            json = reader.readLine();
+            String json = reader.readLine();
             reader.close();
 
-            Object obj = null;
+            Object obj;
             try {
                 obj = new JSONParser().parse(json);
             } catch (ParseException e) {
