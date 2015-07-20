@@ -8,10 +8,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
-import org.apache.poi.hssf.usermodel.HSSFCellStyle;
-import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
-import org.apache.poi.ss.formula.functions.Column;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.Row;
@@ -21,8 +18,6 @@ import org.apache.poi.ss.usermodel.Workbook;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -99,8 +94,7 @@ public class DatabaseAdapter {
         if (cursor.getCount() == 0){
             return -1;
         } else {
-            int id = cursor.getInt(cursor.getColumnIndex(ID_COLUMN));
-            return id;
+            return cursor.getInt(cursor.getColumnIndex(ID_COLUMN));
         }
     }
 
@@ -239,13 +233,13 @@ public class DatabaseAdapter {
         cellsHeaders[6].setCellValue("продукты");
         cellsHeaders[7].setCellValue("деньги");
         //задаем границы для ечеек с загаловками
-        for (int i = 0; i < cellsHeaders.length; i++) {
+        for (Cell cellHeader : cellsHeaders) {
             CellStyle style = wb.createCellStyle();
             style.setBorderTop(CellStyle.BORDER_THIN);
             style.setBorderRight(CellStyle.BORDER_THIN);
             style.setBorderBottom(CellStyle.BORDER_THIN);
             style.setBorderLeft(CellStyle.BORDER_THIN);
-            cellsHeaders[i].setCellStyle(style);
+            cellHeader.setCellStyle(style);
         }
 
         //находим все записи у которых год и месяц соответствую указанным
@@ -273,13 +267,13 @@ public class DatabaseAdapter {
             cells[6].setCellValue(record.getProduct());
             cells[7].setCellValue(record.getMoney());
             //задаем границы как прямые тонкие линии
-            for (int i = 0; i < cells.length; i++) {
+            for (Cell cell : cells) {
                 CellStyle style = wb.createCellStyle();
                 style.setBorderTop(CellStyle.BORDER_THIN);
                 style.setBorderRight(CellStyle.BORDER_THIN);
                 style.setBorderBottom(CellStyle.BORDER_THIN);
                 style.setBorderLeft(CellStyle.BORDER_THIN);
-                cells[i].setCellStyle(style);
+                cell.setCellStyle(style);
             }
             //устанавливаем формат ячеек как чило с двумя знаками после десятичного разделителя
             for (int i = 1; i < cells.length; i++) {
