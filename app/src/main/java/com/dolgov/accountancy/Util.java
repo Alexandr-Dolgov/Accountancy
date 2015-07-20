@@ -8,6 +8,7 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 
 /**
+ * Утилитарный класс реализующий вспомогательные методы
  * Created by Alexandr on 26.06.2015.
  */
 public class Util {
