@@ -1,9 +1,7 @@
 package com.dolgov.accountancy;
 
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
 import java.util.Date;
-import java.util.GregorianCalendar;
 
 public class Record {
     private Date date;
@@ -54,21 +52,6 @@ public class Record {
         this.money = money;
     }
 
-    private Record(){}
-
-    public static Record getFirst(){
-        Record firstRecord = new Record();
-        firstRecord.date = (new GregorianCalendar(2006, Calendar.MAY, 17)).getTime();
-        firstRecord.receipt = 0;
-        firstRecord.prepared = 682.8;
-        firstRecord.remainder = 159;
-        firstRecord.sold = 625;
-        firstRecord.writeOff = 0;
-        firstRecord.product = 2971.23;
-        firstRecord.money = 1346;
-        return firstRecord;
-    }
-
     @Override
     public String toString(){
         StringBuilder sb = new StringBuilder();
@@ -82,13 +65,6 @@ public class Record {
         sb.append("продукты: ").append(product).append(" ");
         sb.append("деньги: ").append(money).append(" ");
         return sb.toString();
-    }
-
-    public Date getNextDate(){
-        GregorianCalendar calendar = new GregorianCalendar();
-        calendar.setTime(this.date);
-        calendar.add(Calendar.DATE, 1);
-        return  calendar.getTime();
     }
 
     public Date getDate() {
@@ -121,13 +97,6 @@ public class Record {
 
     public double getMoney(){
         return money;
-    }
-
-    public Date getPrevDate() {
-        GregorianCalendar calendar = new GregorianCalendar();
-        calendar.setTime(this.date);
-        calendar.add(Calendar.DATE, -1);
-        return calendar.getTime();
     }
 
     @Override
