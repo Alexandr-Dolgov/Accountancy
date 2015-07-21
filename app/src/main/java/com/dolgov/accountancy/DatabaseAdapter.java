@@ -28,7 +28,7 @@ public class DatabaseAdapter {
     private final String TAG = this.getClass().getName();
 
     private static final String DATABASE_NAME = "accountancy.db";
-    private static final int DATABASE_VERSION = 14;
+    private static final int DATABASE_VERSION = 15;
 
     private static final String TABLE_NAME = "mytable";
 
@@ -328,10 +328,10 @@ public class DatabaseAdapter {
                     PRODUCT_COLUMN +" REAL NOT NULL, " +
                     MONEY_COLUMN + " REAL NOT NULL);";
             db.execSQL(sql);
-            long date = (new GregorianCalendar(2015, Calendar.APRIL, 29)).getTime().getTime();
+            long date = (new GregorianCalendar(2015, Calendar.JUNE, 26)).getTime().getTime();
             db.execSQL("INSERT INTO " + TABLE_NAME +
                     " (date, receipt, prepared, remainder, sold, writeOff, product, money) " +
-                    " VALUES ( " + date + ", 11469.0, 2385.7, 474.4, 2000, 0, 31152.28, 9534.52);");
+                    " VALUES ( " + date + ", 0, 1888.3, 120, 2300, 0, 19399.89, 2176.82);");
         }
 
         @Override
