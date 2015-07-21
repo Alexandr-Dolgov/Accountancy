@@ -2,6 +2,7 @@ package com.dolgov.accountancy;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
@@ -21,6 +22,7 @@ import com.vk.sdk.VKSdk;
 import com.vk.sdk.VKSdkListener;
 import com.vk.sdk.VKUIHelper;
 import com.vk.sdk.api.VKError;
+import com.vk.sdk.util.VKUtil;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -54,6 +56,8 @@ public class MainActivity extends Activity {
     Button bReport;
 
     private final String TAG = this.getClass().getName();
+
+    private Activity activity = this;
 
     private Record currentRecord;
 
@@ -264,6 +268,20 @@ public class MainActivity extends Activity {
             @Override
             public void onClick(View v) {
                 VKSdk.initialize(sdkListener, VK_APP_ID);
+
+                //отображаем fingerprint
+                /*
+                String[] fingerprints = VKUtil.getCertificateFingerprint(
+                        activity,
+                        getApplicationContext().getPackageName()
+                );
+                for (String fingerprint : fingerprints){
+                    Log.d(TAG, "fingerprint = " + fingerprint);
+                    ((MainActivity)activity).showAlertDialog("fingerprint", fingerprint);
+                    return;
+                }
+                */
+
                 if (VKSdk.wakeUpSession()) {
                     Log.d(TAG, "работаем с vk");
                     report();
@@ -413,7 +431,7 @@ public class MainActivity extends Activity {
             return;
         }
 
-        //отправляем сообщение с приаттаченым по id ранее загруженным документом
+        //отправляем сообщение с приаттаченым по id ранее загруженным документом Александру Долгову
         String type = "doc";
         long owner_id = (Long)jsonObj.get("owner_id");
         long media_id = did;
@@ -421,6 +439,29 @@ public class MainActivity extends Activity {
         method_name = "messages.send";
         //userId = "170819313";   //идентификатор Евгения Спиридонова
         userId = "12375097";    //идентификатор Александра Долгова
+        Log.d(TAG, "идентификатор пользователя которому отправляем сообщение user_id=" + userId);
+        message = URLEncoder.encode("бухгалтерия за " + fileXlsReport.getName(), "UTF-8");
+        parameters = "user_id=" + userId +
+                "&message=" + message +
+                "&attachment=" + attachment +
+                "&version=5.34";
+        request = "https://api.vk.com/method/" + method_name + "?" +
+                parameters + "&access_token=" + access_token;
+        Log.d(TAG, "request = " + request);
+        try {
+            new RequestGET().execute(request).get();
+        } catch (InterruptedException | ExecutionException e) {
+            e.printStackTrace();
+        }
+
+        //отправляем сообщение с приаттаченым по id ранее загруженным документом Жене Спиридонову
+        type = "doc";
+        owner_id = (Long)jsonObj.get("owner_id");
+        media_id = did;
+        attachment = type + owner_id + "_" + media_id;
+        method_name = "messages.send";
+        userId = "170819313";   //идентификатор Евгения Спиридонова
+        //userId = "12375097";    //идентификатор Александра Долгова
         Log.d(TAG, "идентификатор пользователя которому отправляем сообщение user_id=" + userId);
         message = URLEncoder.encode("бухгалтерия за " + fileXlsReport.getName(), "UTF-8");
         parameters = "user_id=" + userId +
