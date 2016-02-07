@@ -3,7 +3,6 @@ apply plugin: 'com.android.application'
 android {
     compileSdkVersion 21
     buildToolsVersion "21.1.2"
-
     defaultConfig {
         applicationId "com.dolgov.accountancy"
         minSdkVersion 14
@@ -22,7 +21,7 @@ android {
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
     compile 'com.android.support:appcompat-v7:21.0.3'
-    compile 'com.vk:androidsdk:+'
+    compile 'com.vk:androidsdk:1.3.9'
     compile 'com.googlecode.json-simple:json-simple:1.1'
     compile 'org.apache.poi:poi:3.12'
 }
