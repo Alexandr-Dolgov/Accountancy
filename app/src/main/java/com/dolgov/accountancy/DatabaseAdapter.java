@@ -25,10 +25,10 @@ import java.util.GregorianCalendar;
 
 public class DatabaseAdapter {
 
-    private final String TAG = this.getClass().getName();
+    private final String TAG = this.getClass().getName() + "\n";
 
     private static final String DATABASE_NAME = "accountancy.db";
-    private static final int DATABASE_VERSION = 15;
+    private static final int DATABASE_VERSION = 22;
 
     private static final String TABLE_NAME = "mytable";
 
@@ -66,11 +66,35 @@ public class DatabaseAdapter {
         Log.d(TAG, "---insert(Record record) end---");
     }
 
+    //метод обновляющий одну единственную запись
+    //обновляется все кроме ID_COLUMN, DATE_COLUMN
+    public void update(Record newRecord) {
+        Log.d(TAG, "---update(Record oldRecord, Record newRecord)---");
+        printSelectAll();
+
+        StringBuilder sb = new StringBuilder();
+        sb.append("UPDATE ").append(TABLE_NAME);
+        sb.append(" SET ");
+        sb.append(RECEIPT_COLUMN).append(" = ").append(newRecord.getReceipt()).append(", ");
+        sb.append(PREPARED_COLUMN).append(" = ").append(newRecord.getPrepared()).append(", ");
+        sb.append(REMAINDER_COLUMN).append(" = ").append(newRecord.getRemainder()).append(", ");
+        sb.append(SOLD_COLUMN).append(" = ").append(newRecord.getSold()).append(", ");
+        sb.append(WRITE_OFF_COLUMN).append(" = ").append(newRecord.getWriteOff()).append(", ");
+        sb.append(PRODUCT_COLUMN).append(" = ").append(newRecord.getProduct()).append(", ");
+        sb.append(MONEY_COLUMN).append(" = ").append(newRecord.getMoney());
+        sb.append(" WHERE ").append(ID_COLUMN).append(" = ").append(getRecordID(newRecord));
+
+        database.execSQL(sb.toString());
+
+        printSelectAll();
+        Log.d(TAG, "---update(Record oldRecord, Record newRecord) end---");
+    }
+
     public Record getLastRecord(){
         Log.d(TAG, "---getLastRecord()---");
         String sql = "SELECT * " +
                 " FROM " + TABLE_NAME +
-                " WHERE _id=(SELECT MAX(_id) FROM " + TABLE_NAME + " )";
+                " WHERE _id = (SELECT MAX(_id) FROM " + TABLE_NAME + " )";
         Cursor cursor = database.rawQuery(sql, null);
         print(cursor);
         printSelectAll();
@@ -100,10 +124,20 @@ public class DatabaseAdapter {
 
     public Record getPrevRecord(Record currentRecord){
         Log.d(TAG, "---getPrevRecord(Record currentRecord)---");
-        Log.d(TAG, "id = " + getRecordID(currentRecord));
+
+        if (currentRecord == null) {
+            throw new IllegalArgumentException();
+        }
+
+        int currentRecordID = getRecordID(currentRecord);
+        if (currentRecordID == 1) {
+            return null;
+        }
+
+        Log.d(TAG, "id = " + currentRecordID);
         String sql = "SELECT * " +
                 " FROM " + TABLE_NAME +
-                " WHERE _id = " + (getRecordID(currentRecord) - 1);
+                " WHERE _id = " + (currentRecordID - 1);
         Cursor cursor = database.rawQuery(sql, null);
         cursor.moveToFirst();
         if (cursor.getCount() > 0) {
@@ -118,6 +152,11 @@ public class DatabaseAdapter {
     public Record getNextRecord(Record currentRecord) {
         Log.d(TAG, "---getNextRecord(Record currentRecord)---");
         printSelectAll();
+
+        if (currentRecord == null) {
+            return null;
+        }
+
         String sql = "SELECT * " +
                 " FROM " + TABLE_NAME +
                 " WHERE _id = " + (getRecordID(currentRecord) + 1);
@@ -157,6 +196,7 @@ public class DatabaseAdapter {
 
     private void print(Cursor cursor){
         cursor.moveToFirst();
+        StringBuilder sb = new StringBuilder();
         do {
             int id = cursor.getInt(cursor.getColumnIndex(ID_COLUMN));
             long date = cursor.getLong(cursor.getColumnIndex(DATE_COLUMN));
@@ -177,9 +217,12 @@ public class DatabaseAdapter {
                             " writeOff = " + writeOff +
                             " product = " + product +
                             " money = " + money;
-            Log.d(TAG, res);
+            sb.append(res);
+            sb.append('\n');
         } while (cursor.moveToNext());
         cursor.moveToFirst();
+        String allDbToLog = sb.toString();
+        Log.d(TAG, allDbToLog);
     }
 
     private ArrayList<Record> getRecords(Cursor cursor){
@@ -328,10 +371,30 @@ public class DatabaseAdapter {
                     PRODUCT_COLUMN +" REAL NOT NULL, " +
                     MONEY_COLUMN + " REAL NOT NULL);";
             db.execSQL(sql);
-            long date = (new GregorianCalendar(2015, Calendar.JUNE, 26)).getTime().getTime();
+            long date = (new GregorianCalendar(2016, Calendar.JANUARY, 11)).getTime().getTime();
             db.execSQL("INSERT INTO " + TABLE_NAME +
                     " (date, receipt, prepared, remainder, sold, writeOff, product, money) " +
-                    " VALUES ( " + date + ", 0, 1888.3, 120, 2300, 0, 19399.89, 2176.82);");
+                    " VALUES ( " + date + ", 4317.00, 2238.40, 726.00, 1700.00, 0.00, 21641.09, 11305.62);");
+            date = (new GregorianCalendar(2016, Calendar.JANUARY, 12)).getTime().getTime();
+            db.execSQL("INSERT INTO " + TABLE_NAME +
+                    " (date, receipt, prepared, remainder, sold, writeOff, product, money) " +
+                    " VALUES ( " + date + ", 0.00, 1752.30, 183.80, 2300.00, 0.00, 20048.09, 13605.62);");
+            date = (new GregorianCalendar(2016, Calendar.JANUARY, 13)).getTime().getTime();
+            db.execSQL("INSERT INTO " + TABLE_NAME +
+                    " (date, receipt, prepared, remainder, sold, writeOff, product, money) " +
+                    " VALUES ( " + date + ", 3036.00, 2729.70, 177.20, 2600.00, 0.00, 20602.55, 13169.62);");
+            date = (new GregorianCalendar(2016, Calendar.JANUARY, 14)).getTime().getTime();
+            db.execSQL("INSERT INTO " + TABLE_NAME +
+                    " (date, receipt, prepared, remainder, sold, writeOff, product, money) " +
+                    " VALUES ( " + date + ", 0.00, 2509.30, 307.00, 2400.00, 0.00, 18321.37, 15569.62);");
+            date = (new GregorianCalendar(2016, Calendar.JANUARY, 15)).getTime().getTime();
+            db.execSQL("INSERT INTO " + TABLE_NAME +
+                    " (date, receipt, prepared, remainder, sold, writeOff, product, money) " +
+                    " VALUES ( " + date + ", 6300.00, 2496.20, 702.80, 2100.00, 0.00, 22352.09, 11369.62);");
+            date = (new GregorianCalendar(2016, Calendar.JANUARY, 18)).getTime().getTime();
+            db.execSQL("INSERT INTO " + TABLE_NAME +
+                    " (date, receipt, prepared, remainder, sold, writeOff, product, money) " +
+                    " VALUES ( " + date + ", 0.00, 2522.90, 507.20, 2700.00, 0.00, 20058.55, 14069.62);");
         }
 
         @Override

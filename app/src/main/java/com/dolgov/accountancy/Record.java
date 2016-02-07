@@ -33,6 +33,19 @@ public class Record {
         this.money = prevRecord.money - receipt + sold - writeOff;
     }
 
+    public Record(Record prevRecord, Record currentRecord) {
+        this.date = currentRecord.date;
+        this.receipt = currentRecord.receipt;
+        this.prepared = currentRecord.prepared;
+        this.remainder = currentRecord.remainder;
+        this.sold = currentRecord.sold;
+        this.writeOff =currentRecord.writeOff;
+
+        //calc: product, money
+        this.product = prevRecord.product + receipt - (prepared / 1.1);
+        this.money = prevRecord.money - receipt + sold - writeOff;
+    }
+
     public Record(
             Date date,
             double receipt,

@@ -35,6 +35,7 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.Locale;
 import java.util.concurrent.ExecutionException;
 
 public class MainActivity extends Activity {
@@ -55,7 +56,7 @@ public class MainActivity extends Activity {
     Button bNext;
     Button bReport;
 
-    private final String TAG = this.getClass().getName();
+    private final String TAG = this.getClass().getName() + "\n";
 
     private Activity activity = this;
 
@@ -124,40 +125,92 @@ public class MainActivity extends Activity {
         bCalc.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                //если следующих запесей нет, и при этом последняя запись не является текущей
+                // т.е. только что ввели новую запись,
+                //тогда высчитываем ее и отображаем на экране, но не сохраняем в БД
+                if (dbAdapter.getNextRecord(currentRecord) == null &&
+                        !(dbAdapter.getLastRecord().equals(currentRecord))) {
+                    //создаем новую запись по данным из полей ввода
+                    //и помещаем ее в текущую
 
-                //TODO сделать пересчет всех последующих записей на основании текущей
-                //для этого сделать в DatabaseAdapter метод изменения той или иной записи в БД
+                    Record newRecord;
+                    try {
+                        SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy");
+                        Date currentDate = sdf.parse(tvDate.getText().toString(), new ParsePosition(0));
+                        newRecord = new Record(
+                                dbAdapter.getLastRecord(),
+                                currentDate,
+                                Double.parseDouble(etReceipt.getText().toString()),
+                                Double.parseDouble(etPrepared.getText().toString()),
+                                Double.parseDouble(etRemainder.getText().toString()),
+                                Double.parseDouble(etSold.getText().toString()),
+                                Double.parseDouble(etWriteOff.getText().toString())
+                        );
+                    } catch (NumberFormatException e){
+                        Toast toast = Toast.makeText(getApplicationContext(),
+                                "Заполните все поля!",
+                                Toast.LENGTH_SHORT);
+                        toast.setGravity(Gravity.CENTER, 0, 0);
+                        toast.show();
+                        return;
+                    }
 
-                //создаем новую запись по данным из полей ввода
-                //и помещаем ее в текущую
-                Record newRecord;
-                try {
-                    SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy");
-                    Date currentDate = sdf.parse(tvDate.getText().toString(), new ParsePosition(0));
-                    newRecord = new Record(
-                            dbAdapter.getLastRecord(),
-                            currentDate,
-                            Double.parseDouble(etReceipt.getText().toString()),
-                            Double.parseDouble(etPrepared.getText().toString()),
-                            Double.parseDouble(etRemainder.getText().toString()),
-                            Double.parseDouble(etSold.getText().toString()),
-                            Double.parseDouble(etWriteOff.getText().toString())
-                    );
-                } catch (NumberFormatException e){
-                    Toast toast = Toast.makeText(getApplicationContext(),
-                            "Заполните все поля!",
-                            Toast.LENGTH_SHORT);
-                    toast.setGravity(Gravity.CENTER, 0, 0);
-                    toast.show();
-                    return;
+                    currentRecord = newRecord;
+                    showCurrentRecord();
+                } else {
+                    //иначе это не не новая запись, она уже есть в БД,
+                    // и нам нужно пересчитать все записи начиная с этой и по последнюю
+                    // и обнавить данные в БД
+                    Log.d(TAG, "это не последняя запись в БД и нам нужно пересчитать все записи " +
+                            "начиная с этой и по последнюю");
+
+                    Record prevRecord = dbAdapter.getPrevRecord(currentRecord);
+                    if (prevRecord == null) {
+                        Toast toast = Toast.makeText(getApplicationContext(),
+                                "Это первая запись, её невозможно отредактировать.",
+                                Toast.LENGTH_SHORT);
+                        toast.setGravity(Gravity.CENTER, 0, 0);
+                        toast.show();
+                        showCurrentRecord();
+                        return;
+                    }
+
+                    Record newRecord;
+                    try {
+                        SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy");
+                        Date date = sdf.parse(tvDate.getText().toString(), new ParsePosition(0));
+                        newRecord = new Record(
+                                prevRecord,
+                                date,
+                                Double.parseDouble(etReceipt.getText().toString()),
+                                Double.parseDouble(etPrepared.getText().toString()),
+                                Double.parseDouble(etRemainder.getText().toString()),
+                                Double.parseDouble(etSold.getText().toString()),
+                                Double.parseDouble(etWriteOff.getText().toString())
+                        );
+                    } catch (NumberFormatException e){
+                        Toast toast = Toast.makeText(getApplicationContext(),
+                                "Заполните все поля!",
+                                Toast.LENGTH_SHORT);
+                        toast.setGravity(Gravity.CENTER, 0, 0);
+                        toast.show();
+
+                        return;
+                    }
+
+                    currentRecord = newRecord;
+
+                    Record nextRecord;
+                    do {
+                        dbAdapter.update(newRecord);
+                        nextRecord = dbAdapter.getNextRecord(newRecord);
+                        if (nextRecord != null) {
+                            newRecord = new Record(newRecord, nextRecord);
+                        }
+                    } while (nextRecord != null);
+
+                    showCurrentRecord();
                 }
-                currentRecord = newRecord;
-
-                //отображаем деньги и продукты из толькочто созданной записи
-                double product = newRecord.getProduct();
-                tvProduct.setText(String.format("%.2f", product));
-                double money = newRecord.getMoney();
-                tvMoney.setText(String.format("%.2f", money));
             }
         });
 
@@ -437,7 +490,6 @@ public class MainActivity extends Activity {
         long media_id = did;
         String attachment = type + owner_id + "_" + media_id;
         method_name = "messages.send";
-        //userId = "170819313";   //идентификатор Евгения Спиридонова
         userId = "12375097";    //идентификатор Александра Долгова
         Log.d(TAG, "идентификатор пользователя которому отправляем сообщение user_id=" + userId);
         message = URLEncoder.encode("бухгалтерия за " + fileXlsReport.getName(), "UTF-8");
@@ -461,7 +513,6 @@ public class MainActivity extends Activity {
         attachment = type + owner_id + "_" + media_id;
         method_name = "messages.send";
         userId = "170819313";   //идентификатор Евгения Спиридонова
-        //userId = "12375097";    //идентификатор Александра Долгова
         Log.d(TAG, "идентификатор пользователя которому отправляем сообщение user_id=" + userId);
         message = URLEncoder.encode("бухгалтерия за " + fileXlsReport.getName(), "UTF-8");
         parameters = "user_id=" + userId +
@@ -500,13 +551,17 @@ public class MainActivity extends Activity {
         SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy");
         tvDate.setText(sdf.format(record.getDate()));
 
-        etReceipt.setText(String.format("%.2f", record.getReceipt()));
-        etPrepared.setText(String.format("%.2f", record.getPrepared()));
-        etRemainder.setText(String.format("%.2f", record.getRemainder()));
-        etSold.setText(String.format("%.2f", record.getSold()));
-        etWriteOff.setText(String.format("%.2f", record.getWriteOff()));
-        tvProduct.setText(String.format("%.2f", record.getProduct()));
-        tvMoney.setText(String.format("%.2f", record.getMoney()));
+        etReceipt.setText(format(record.getReceipt()));
+        etPrepared.setText(format(record.getPrepared()));
+        etRemainder.setText(format(record.getRemainder()));
+        etSold.setText(format(record.getSold()));
+        etWriteOff.setText(format(record.getWriteOff()));
+        tvProduct.setText(format(record.getProduct()));
+        tvMoney.setText(format(record.getMoney()));
+    }
+
+    private String format(double value) {
+        return String.format(Locale.US, "%.2f", value);
     }
 
     @Override
